@@ -1,0 +1,20 @@
+# dependencies
+node_modules
+**/node_modules
+
+# build outputs
+dist
+**/dist
+
+# env files
+.env
+.env.*
+!.env.example
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# OS junk
+.DS_Store

@@ -1,0 +1,21 @@
+{
+    "name": "keeper",
+    "private": true,
+    "workspaces": [
+        "packages/*"
+    ],
+    "scripts": {
+        "dev": "concurrently -n client,server \"npm -w @repo/client run dev\" \"npm -w @repo/server run dev\"",
+        "build": "npm -w @repo/client run build && npm -w @repo/server run build",
+        "studio": "npm run studio -w packages/server"
+    },
+    "devDependencies": {
+        "@types/cookie-parser": "^1.4.10",
+        "@types/cors": "^2.8.19",
+        "concurrently": "^9.2.1"
+    },
+    "dependencies": {
+        "cookie-parser": "^1.4.7",
+        "uuid": "^13.0.0"
+    }
+}
