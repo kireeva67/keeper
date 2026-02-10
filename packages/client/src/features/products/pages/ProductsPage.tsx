@@ -11,7 +11,9 @@ export default function ProductsPage() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        getProducts().then(products => setCount(products.length))
+        getProducts()
+            .then(products => setCount(products.length))
+            .catch(() => { });
     }, []);
 
     return (

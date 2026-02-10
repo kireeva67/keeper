@@ -1,17 +1,16 @@
 import { Button, DialogActions, TextField } from "@mui/material";
 import { useState } from "react";
 import { addProduct } from "../api/addProduct";
-import { HttpError } from "../../../shared/errors/HTTPError";
 import type { Product } from "../../../shared/types/ProductType";
+import { HttpError } from "../../../shared/errors/HTTPError";
 
 type Props = {
   onCancel?: () => void;
   onSuccess: () => void;
-  onUnauthorized: () => void;
 };
 
-export function NewProductForm({ onCancel, onSuccess, onUnauthorized }: Props) {
-  const { values, setField, submitting, handleSubmit } = useNewProductForm({ onSuccess, onUnauthorized });
+export function NewProductForm({ onCancel, onSuccess }: Props) {
+  const { values, setField, submitting, handleSubmit } = useNewProductForm({ onSuccess });
 
   return (
     <form onSubmit={handleSubmit}>
@@ -31,7 +30,7 @@ export function NewProductForm({ onCancel, onSuccess, onUnauthorized }: Props) {
   );
 }
 
-function useNewProductForm({ onSuccess, onUnauthorized }: Props) {
+function useNewProductForm({ onSuccess }: Props) {
   const [values, setValues] = useState<Product>({ title: "", url: "", description: "" });
   const [submitting, setSubmitting] = useState(false);
 
@@ -48,9 +47,8 @@ function useNewProductForm({ onSuccess, onUnauthorized }: Props) {
       await addProduct(values);
       onSuccess();
     } catch (err) {
-      if (err instanceof HttpError && err.status === 401) {
-        onUnauthorized();
-      }
+      if (err instanceof HttpError && err.status === 401) return;
+      throw err;
     } finally {
       setSubmitting(false);
     }

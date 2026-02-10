@@ -1,6 +1,6 @@
 import { Dialog, DialogTitle, DialogContent } from "@mui/material";
 import { useNavigate, useLocation } from "react-router-dom";
-import { LOGIN_ROUTE, PRODUCTS_ROUTE } from "../../auth/config/authURLS";
+import { PRODUCTS_ROUTE } from "../../auth/config/authURLS";
 import type { LocationState } from "../../../shared/types/LocationType";
 import { NewProductForm } from "./NewProductForm";
 
@@ -23,7 +23,6 @@ export default function NewProductDialog({ fullPage = false }: { fullPage?: bool
     <NewProductForm
       onCancel={handleClose}
       onSuccess={handleClose}
-      onUnauthorized={() => navigate(LOGIN_ROUTE, { replace: true })}
     />
   );
 

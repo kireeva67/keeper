@@ -106,11 +106,7 @@ app.post(`/api/products`, requireAuth, async (req, res) => {
 });
 
 app.get(`/api/healthCheck`, requireAuth, async (req, res) => { //TODO add check on render if user still logged in
-    const user = (req as any).user;
-    res.json({
-        valide: true,
-        user: { email: user.email, id: user.id }
-    });
+    res.json(true);
 });
 
 app.listen(3000, () => {
