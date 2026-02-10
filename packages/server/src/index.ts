@@ -5,7 +5,7 @@ import session from 'express-session';
 import dotenv from 'dotenv';
 import { prismaController } from './prisma/PrismaController';
 import { log } from 'node:console';
-import { TTableUserData } from './types/TableTypes';
+import { TTableProductData, TTableUserData } from './types/TableTypes';
 import cookieParser from "cookie-parser";
 import { TToken } from './types/Token';
 import cors from "cors";
@@ -86,13 +86,29 @@ app.get('/auth/google/callback',
             expires: token.validTo
         });
         log('Set session cookie', res.cookie);
-        res.redirect(`/dashboard`); //TODO redirect to main page
+        res.redirect(`${process.env.CLIENT_URL}/products`);
     });
 
-app.get('/dashboard', requireAuth, (req, res) => {
+app.get(`/api/products`, requireAuth, async (req, res) => {
+    const user = (req as any).user;
+    const products = await prismaController.getProductsForUser(user.email);
+    log('Fetched products for user:', products);
+    res.json(products);
+});
+
+app.post(`/api/products`, requireAuth, async (req, res) => {
+    log('Attempting to create product for user:', req.user);
+    const user = (req as any).user;
+    const body: TTableProductData = req.body;
+    const product = await prismaController.createProduct(user.email, body);
+    log('Created product for user:', product);
+    res.json(product);
+});
+
+app.get(`/api/healthCheck`, requireAuth, async (req, res) => { //TODO add check on render if user still logged in
     const user = (req as any).user;
     res.json({
-        message: `Welcome ${user.email}!`,
+        valide: true,
         user: { email: user.email, id: user.id }
     });
 });

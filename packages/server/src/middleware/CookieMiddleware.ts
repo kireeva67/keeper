@@ -8,14 +8,22 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
     const raw = req.cookies?.sid;
     log('Auth middleware - session id from cookie:', raw);
     if (!raw) {
-      res.redirect(`${process.env.CLIENT_URL}${LOGIN_ROUTE}`);
-      return;
+      if (req.path.startsWith('/api')) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      } else {
+        res.redirect(`${process.env.CLIENT_URL}${LOGIN_ROUTE}`);
+        return;
+      }
     };
 
     const session = await prismaController.findValidSession(raw);
     if (!session) {
-      res.redirect(`${process.env.CLIENT_URL}${LOGIN_ROUTE}`)
-      return;
+      if (req.path.startsWith('/api')) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      } else {
+        res.redirect(`${process.env.CLIENT_URL}${LOGIN_ROUTE}`);
+        return;
+      }
     }
 
     (req as any).userId = session.userId; //TODO check types(include in tsconfig)

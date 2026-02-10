@@ -1,6 +1,7 @@
 import { prisma } from './prisma'
 import { TokenUtil } from '../token/TokenUtil';
 import { TToken } from '../types/Token';
+import { TTableProductData } from '../types/TableTypes';
 
 export class PrismaController {
 
@@ -57,6 +58,26 @@ export class PrismaController {
                 validTo: { gt: new Date() }, //grater than now
             },
             include: { user: true },
+        });
+    }
+
+    public async getProductsForUser(email: string) {
+        const user = await this.getUser(email);
+        if (!user) {
+            throw new Error("User not found");
+        }
+        return await prisma.product.findMany({
+            where: { userId: user.id }
+        });
+    }
+
+    public async createProduct(email: string, data: TTableProductData) {
+        const user = await this.getUser(email);
+        if (!user) {
+            throw new Error("User not found");
+        }
+        return await prisma.product.create({
+            data: { userId: user.id, title: data.title, description: data.description || "", url: data.url },
         });
     }
 }

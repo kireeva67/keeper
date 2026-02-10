@@ -15,6 +15,7 @@ model User {
  email String @unique
  password String
  sessions Session[]
+ products Product[]
  createdAt DateTime  @default(now())
  updatedAt DateTime  @updatedAt
 }
@@ -27,4 +28,16 @@ model Session {
    validTo DateTime
    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
    @@index([userId])
+}
+
+model Product {
+   id Int @id @default(autoincrement())
+   userId Int
+   title String
+   description String?
+   url String @unique
+   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+   @@index([userId])
+   createdAt DateTime  @default(now())
+   updatedAt DateTime  @updatedAt
 }
