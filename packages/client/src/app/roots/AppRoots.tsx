@@ -10,6 +10,7 @@ import LoginPage from "../../features/auth/pages/LoginPage";
 import { ProtectedRoute } from "../../features/auth/routes/ProtectedRoute";
 import ProductsPage from "../../features/products/pages/ProductsPage";
 import NewProductDialog from "../../features/products/dialog/NewProductDialog";
+import { ScrollContentLayout } from "../../shared/components/ScrollableContentLayout";
 
 
 export function UnauthorizedBridge() {
@@ -40,11 +41,16 @@ export function AppRoutes() {
                 <Route element={<CenteredLayout />} >
                     <Route path={LOGIN_ROUTE} element={<LoginPage />} />
                     <Route path={SIGN_UP_ROUTE} element={<SignUpPage />} />
-                    <Route element={<ProtectedRoute />}>
+                </Route>
+                <Route element={<ProtectedRoute />}>
+                    <Route element={<ScrollContentLayout />} >
                         <Route path={PRODUCTS_ROUTE} element={<ProductsPage />} />
+                    </Route>
+                    <Route element={<CenteredLayout />} >
                         <Route path={PRODUCTS_NEW_ROUTE} element={<NewProductDialog fullPage />} />
                     </Route>
                 </Route>
+
 
                 <Route path="*" element={<Navigate to={LOGIN_ROUTE} replace />} />
             </Routes>
