@@ -7,12 +7,15 @@ import { PRODUCTS_NEW_ROUTE } from '../../auth/config/authURLS';
 import { CardsGrid } from '../cards/CardsGrid';
 import type { Product } from '../../../shared/types/ProductType';
 import { ProductCard } from '../cards/ProductCard';
-import { DEFAULT_PRODUCT_IMAGE } from '../cards/DefaultImage';
 
 export default function ProductsPage() {
     const [count, setCount] = useState<number>(0);
     const [products, setProducts] = useState<Product[]>([]);
     const navigate = useNavigate();
+
+    const handleDeleteFromState = (id: number) => {
+        setProducts((prev) => prev.filter((p) => p.id !== id));
+    };
 
     useEffect(() => {
         getProducts()
@@ -38,8 +41,12 @@ export default function ProductsPage() {
             </AppBar>
 
             <CardsGrid>
-                {products.map((p, i) => (
-                    <ProductCard key={i} title={p.title} imageUrl={DEFAULT_PRODUCT_IMAGE} goTo={p.url} description={p.description ?? ''} />
+                {products.map((p) => (
+                    <ProductCard
+                        key={p.id}
+                        product={p}
+                        onDelete={handleDeleteFromState}
+                    />
                 ))}
             </CardsGrid>
 

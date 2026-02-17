@@ -36,6 +36,7 @@ model Product {
    title String
    description String?
    url String @unique
+   imageUrl String?
    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
    @@index([userId])
    createdAt DateTime  @default(now())

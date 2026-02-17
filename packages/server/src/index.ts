@@ -10,6 +10,7 @@ import cookieParser from "cookie-parser";
 import { TToken } from './types/Token';
 import cors from "cors";
 import { requireAuth } from './middleware/CookieMiddleware';
+import { getMetadata } from '../utils/getMetadata';
 
 
 dotenv.config();
@@ -62,13 +63,6 @@ passport.deserializeUser((user: Express.User, done) => {
     done(null, user);
 });
 
-
-
-
-// app.get('/', (req, res) => {
-//     res.sendFile('index.html', { root: './public' });
-// });
-
 app.get('/auth/google',
     passport.authenticate('google', { scope: ['profile', 'email'] }));
 
@@ -100,13 +94,34 @@ app.post(`/api/products`, requireAuth, async (req, res) => {
     log('Attempting to create product for user:', req.user);
     const user = (req as any).user;
     const body: TTableProductData = req.body;
-    const product = await prismaController.createProduct(user.email, body);
+    const meta = await getMetadata(body.url);
+    const imageUrl = meta.image; //TODO store image in S3
+    log('Fetched metadata for URL:', meta);
+    const product = await prismaController.createProduct(user.email, { ...body, imageUrl });
     log('Created product for user:', product);
     res.json(product);
 });
 
-app.get(`/api/healthCheck`, requireAuth, async (req, res) => { //TODO add check on render if user still logged in
+app.get(`/api/healthCheck`, requireAuth, async (req, res) => {
     res.json(true);
+});
+
+//TODO do i need try catch inside endpoint???
+
+app.delete(`/api/products/:id`, requireAuth, async (req, res) => {
+    const user = (req as any).user;
+    const productId = parseInt(`${req.params.id}`);
+    log('Attempting to delete product for user:', user, 'productId:', req.params);
+    await prismaController.deleteProduct(productId, user.email);
+    res.json(true);
+});
+
+app.put(`/api/products/:id`, requireAuth, async (req, res) => {
+    const user = (req as any).user;
+    const productId = parseInt(req.params.id as string);
+    const body: TTableProductData = req.body;
+    const product = await prismaController.editProduct(productId, user.email, body);
+    res.json(product);
 });
 
 app.listen(3000, () => {

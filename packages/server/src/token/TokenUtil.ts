@@ -4,7 +4,7 @@ import { TToken } from "../types/Token";
 
 export class TokenUtil {
     // protected static SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 1; // 1 day
-    protected static SESSION_TTL_MS = 1000 * 60 * 2; // 2 minutes
+    protected static SESSION_TTL_MS = 1000 * 60 * 10; // 10 minutes
 
     public static createToken(): TToken {
         const token = uuidv4();

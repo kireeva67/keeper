@@ -8,4 +8,5 @@ export type TTableProductData = {
     title: string;
     description?: string;
     url: string;
+    imageUrl?: string | null;
 }

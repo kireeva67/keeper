@@ -21,33 +21,40 @@ export class PrismaController {
 
     public async createSession(email: string): Promise<TToken> {
         const token = TokenUtil.createToken();
-
-        const existingSession = await prisma.session.findUnique({
-            where: { token: token.hashed }
-        });
-
-        if (existingSession) {
-            return token;
-        }
-        const user = await this.getUser(email);
-        if (!user) {
-            throw new Error("User not found");
-        }
-        const userSessions = await prisma.session.findMany({
-            where: { userId: user.id },
-            orderBy: { createdAt: 'asc' }
-        });
-
-        if (userSessions.length >= 5) {
-            await prisma.session.delete({
-                where: { id: userSessions[0].id }
+        try {
+            await prisma.session.create({
+                data: {
+                    token: token.hashed,
+                    validTo: token.validTo,
+                    user: {
+                        connect: { email: email }
+                    }
+                },
             });
-        }
 
-        await prisma.session.create({
-            data: { userId: user.id, token: token.hashed, validTo: token.validTo },
-        });
-        return token;
+            const user = await prisma.user.findUnique({
+                where: { email },
+                select: { id: true }
+            });
+
+            if (user) {
+                const sessions = await prisma.session.findMany({
+                    where: { userId: user.id },
+                    orderBy: { createdAt: 'desc' },
+                    skip: 5, //skipping the most recent 5 sessions
+                });
+
+                if (sessions.length > 0) {
+                    await prisma.session.deleteMany({
+                        where: { id: { in: sessions.map(s => s.id) } }
+                    });
+                }
+            }
+
+            return token;
+        } catch (error) {
+            throw new Error("Could not create session. User may not exist.");
+        }
     }
 
     public async findValidSession(rawToken: string) {
@@ -62,22 +69,47 @@ export class PrismaController {
     }
 
     public async getProductsForUser(email: string) {
-        const user = await this.getUser(email);
-        if (!user) {
-            throw new Error("User not found");
-        }
         return await prisma.product.findMany({
-            where: { userId: user.id }
+            where: {
+                user: {
+                    email: email
+                }
+            },
+            orderBy: {
+                createdAt: 'desc'
+            }
         });
     }
 
     public async createProduct(email: string, data: TTableProductData) {
-        const user = await this.getUser(email);
-        if (!user) {
-            throw new Error("User not found");
-        }
         return await prisma.product.create({
-            data: { userId: user.id, title: data.title, description: data.description || "", url: data.url },
+            data: { user: { connect: { email: email } }, title: data.title, description: data.description || "", url: data.url, imageUrl: data.imageUrl },
+        });
+    }
+
+    public async deleteProduct(id: number, email: string) {
+        return await prisma.product.delete({
+            where: {
+                id: id,
+                user: {
+                    email: email
+                }
+            },
+        });
+    }
+
+    public async editProduct(id: number, email: string, data: TTableProductData) {
+        return await prisma.product.update({
+            where: {
+                id: id,
+                user: {
+                    email: email
+                }
+            },
+            data: {
+                title: data.title,
+                description: data.description || ""
+            },
         });
     }
 }

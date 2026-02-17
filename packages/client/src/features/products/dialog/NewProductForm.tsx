@@ -31,7 +31,7 @@ export function NewProductForm({ onCancel, onSuccess }: Props) {
 }
 
 function useNewProductForm({ onSuccess }: Props) {
-  const [values, setValues] = useState<Product>({ title: "", url: "", description: "" });
+  const [values, setValues] = useState<Product>({ title: "", url: "", description: "", id: 0 });
   const [submitting, setSubmitting] = useState(false);
 
   function setField<K extends keyof Product>(key: K, value: Product[K]) {

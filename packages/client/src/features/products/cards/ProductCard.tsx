@@ -15,17 +15,18 @@ import {
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import { deleteProduct } from "../api/deleteProduct";
+import type { Product } from "../../../shared/types/ProductType";
+import { DEFAULT_PRODUCT_IMAGE } from "./DefaultImage";
 
 type CardProps = {
-    title: string;
-    imageUrl: string;
-    goTo: string;
-    description: string;
+    product: Product;
+    onDelete: (id: number) => void;
 };
 
-export function ProductCard({ title, imageUrl, goTo, description }: CardProps) {
+export function ProductCard({ product, onDelete }: CardProps) {
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-
+    const { title, imageUrl, url, description, id } = product;
     const menuOpen = Boolean(anchorEl);
     const openMenu = (e: React.MouseEvent<HTMLElement>) => setAnchorEl(e.currentTarget);
     const closeMenu = () => setAnchorEl(null);
@@ -37,7 +38,8 @@ export function ProductCard({ title, imageUrl, goTo, description }: CardProps) {
 
     const handleDelete = () => {
         closeMenu();
-        // onDelete(); //TODO
+        deleteProduct(id);
+        onDelete(id);
     };
 
     return (
@@ -70,11 +72,11 @@ export function ProductCard({ title, imageUrl, goTo, description }: CardProps) {
             />
 
             <CardActionArea component="a"
-                href={goTo}
+                href={url}
                 target="_blank"
                 rel="noopener noreferrer"
             >
-                <CardMedia component="img" height="180" image={imageUrl} alt={title} loading="lazy" />
+                <CardMedia component="img" height="400" image={imageUrl ?? DEFAULT_PRODUCT_IMAGE} alt={title} loading="lazy" />
 
             </CardActionArea>
             <CardContent>
