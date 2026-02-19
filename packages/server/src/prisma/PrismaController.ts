@@ -98,7 +98,7 @@ export class PrismaController {
         });
     }
 
-    public async editProduct(id: number, email: string, data: TTableProductData) {
+    public async updateProduct(id: number, email: string, data: TTableProductData) {
         return await prisma.product.update({
             where: {
                 id: id,
@@ -110,6 +110,29 @@ export class PrismaController {
                 title: data.title,
                 description: data.description || ""
             },
+        });
+    }
+
+    public async getProduct(id: number, email: string) {
+        return await prisma.product.findFirst({
+            where: {
+                id: id,
+                user: {
+                    email: email
+                }
+            },
+        });
+    }
+
+    public async findProductByUrl(url: string, email: string) {
+        return await prisma.product.findFirst({
+            where: {
+                url,
+                user: {
+                    email: email
+                }
+
+            }
         });
     }
 }

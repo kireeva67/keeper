@@ -2,13 +2,16 @@ import { Dialog, DialogTitle, DialogContent } from "@mui/material";
 import { useNavigate, useLocation } from "react-router-dom";
 import { PRODUCTS_ROUTE } from "../../auth/config/authURLS";
 import type { LocationState } from "../../../shared/types/LocationType";
-import { NewProductForm } from "./NewProductForm";
+import { ProductForm } from "./ProductForm";
+import { useProducts } from "../api/useProducts";
+import type { Product } from "../../../shared/types/ProductType";
 
 export default function NewProductDialog({ fullPage = false }: { fullPage?: boolean }) {
   const navigate = useNavigate();
   const location = useLocation();
   const state = location.state as LocationState | null;
   const isModal = Boolean(state?.background) && !fullPage;
+  const { addProductToState } = useProducts();
 
   const handleClose = () => {
     const state = location.state as { background?: Location } | undefined;
@@ -19,10 +22,17 @@ export default function NewProductDialog({ fullPage = false }: { fullPage?: bool
     }
   };
 
+  const handleSuccess = (newProduct?: Product) => {
+    if (newProduct) {
+      addProductToState(newProduct);
+    }
+    handleClose();
+  };
+
   const content = (
-    <NewProductForm
+    <ProductForm
       onCancel={handleClose}
-      onSuccess={handleClose}
+      onSuccess={handleSuccess}
     />
   );
 

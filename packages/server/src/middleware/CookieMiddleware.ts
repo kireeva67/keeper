@@ -19,12 +19,6 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
     const session = await prismaController.findValidSession(raw);
     if (!session) {
       return res.status(401).json({ error: 'Unauthorized' });
-      //if (req.path.startsWith('/api')) {
-      //   return res.status(401).json({ error: 'Unauthorized' });
-      /*} /*else {
-        res.redirect(`${process.env.CLIENT_URL}${LOGIN_ROUTE}`);
-        return;
-      }*/
     }
 
     (req as any).userId = session.userId; //TODO check types(include in tsconfig)

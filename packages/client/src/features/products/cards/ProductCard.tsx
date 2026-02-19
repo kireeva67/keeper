@@ -18,29 +18,41 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { deleteProduct } from "../api/deleteProduct";
 import type { Product } from "../../../shared/types/ProductType";
 import { DEFAULT_PRODUCT_IMAGE } from "./DefaultImage";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useProducts } from "../api/useProducts";
 
 type CardProps = {
     product: Product;
-    onDelete: (id: number) => void;
 };
 
-export function ProductCard({ product, onDelete }: CardProps) {
+export function ProductCard({ product }: CardProps) {
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
     const { title, imageUrl, url, description, id } = product;
     const menuOpen = Boolean(anchorEl);
     const openMenu = (e: React.MouseEvent<HTMLElement>) => setAnchorEl(e.currentTarget);
     const closeMenu = () => setAnchorEl(null);
+    const navigate = useNavigate();
+    const location = useLocation();
+    const { deleteProductFromState } = useProducts();
 
     const handleEdit = () => {
         closeMenu();
-        // onEdit(); //TODO
+        navigate(`/products/edit/${id}`, { state: { background: location } });
     };
 
-    const handleDelete = () => {
+    const handleDelete = async () => {
         closeMenu();
-        deleteProduct(id);
-        onDelete(id);
+        const success = await deleteProduct(id);
+        if (success) {
+            deleteProductFromState(id); // Card disappears instantly
+        }
     };
+
+    // const handleDelete = () => {
+    //     closeMenu();
+    //     deleteProduct(id);
+    //     onDelete(id);
+    // };
 
     return (
         <Card sx={{ borderRadius: 2 }}>

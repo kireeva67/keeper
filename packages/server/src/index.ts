@@ -11,6 +11,7 @@ import { TToken } from './types/Token';
 import cors from "cors";
 import { requireAuth } from './middleware/CookieMiddleware';
 import { getMetadata } from '../utils/getMetadata';
+import { Prisma } from '../generated/prisma';
 
 
 dotenv.config();
@@ -84,44 +85,96 @@ app.get('/auth/google/callback',
     });
 
 app.get(`/api/products`, requireAuth, async (req, res) => {
-    const user = (req as any).user;
-    const products = await prismaController.getProductsForUser(user.email);
-    log('Fetched products for user:', products);
-    res.json(products);
+    try {
+        const user = (req as any).user;
+        const products = await prismaController.getProductsForUser(user.email);
+        log('Fetched products for user:', products);
+        res.json(products);
+    } catch (error) {
+        console.error('Failed to fetch products:', error);
+        res.status(500).json({ message: 'Could not load your products.' });
+    }
 });
 
 app.post(`/api/products`, requireAuth, async (req, res) => {
-    log('Attempting to create product for user:', req.user);
-    const user = (req as any).user;
-    const body: TTableProductData = req.body;
-    const meta = await getMetadata(body.url);
-    const imageUrl = meta.image; //TODO store image in S3
-    log('Fetched metadata for URL:', meta);
-    const product = await prismaController.createProduct(user.email, { ...body, imageUrl });
-    log('Created product for user:', product);
-    res.json(product);
+    try {
+        const user = (req as any).user;
+        const body: TTableProductData = req.body;
+        const existingProduct = await prismaController.findProductByUrl(body.url, user.email);
+        if (existingProduct) {
+            return res.status(409).json({
+                message: 'This URL is already in your collection.'
+            });
+        }
+        const meta = await getMetadata(body.url);
+        const imageUrl = meta.image; //TODO store image in S3
+        log('Fetched metadata for URL:', meta);
+        const product = await prismaController.createProduct(user.email, { ...body, imageUrl });
+        log('Created product for user:', product);
+        res.json(product);
+    } catch (error) {
+        console.error('Failed to create product:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+
 });
 
 app.get(`/api/healthCheck`, requireAuth, async (req, res) => {
     res.json(true);
 });
 
-//TODO do i need try catch inside endpoint???
-
 app.delete(`/api/products/:id`, requireAuth, async (req, res) => {
-    const user = (req as any).user;
-    const productId = parseInt(`${req.params.id}`);
-    log('Attempting to delete product for user:', user, 'productId:', req.params);
-    await prismaController.deleteProduct(productId, user.email);
-    res.json(true);
+    try {
+        const user = (req as any).user;
+        const productId = parseInt(`${req.params.id}`);
+        if (isNaN(productId)) {
+            return res.status(400).json({ message: 'Invalid product ID' });
+        }
+        log('Attempting to delete product for user:', user, 'productId:', req.params);
+        await prismaController.deleteProduct(productId, user.email);
+        res.json(true);
+    } catch (error) {
+        console.error('Failed to delete product:', error);
+        res.status(500).json({ message: 'Failed to delete product.' });
+    }
+
 });
 
 app.put(`/api/products/:id`, requireAuth, async (req, res) => {
-    const user = (req as any).user;
-    const productId = parseInt(req.params.id as string);
-    const body: TTableProductData = req.body;
-    const product = await prismaController.editProduct(productId, user.email, body);
-    res.json(product);
+    try {
+        const user = (req as any).user;
+        const productId = parseInt(req.params.id as string);
+        if (isNaN(productId)) {
+            return res.status(400).json({ message: 'Invalid product ID' });
+        }
+        const body: TTableProductData = req.body;
+        const product = await prismaController.updateProduct(productId, user.email, body);
+        res.json(product);
+    } catch (error) {
+        if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+            return res.status(409).json({ message: 'Another product already uses this URL.' });
+        }
+        res.status(500).json({ message: 'Failed to update product.' });
+    }
+});
+
+app.get(`/api/products/:id`, requireAuth, async (req, res) => {
+    try {
+        const user = (req as any).user;
+        const productId = parseInt(`${req.params.id}`);
+        if (isNaN(productId)) {
+            return res.status(400).json({ message: 'Invalid product ID' });
+        }
+        const product = await prismaController.getProduct(productId, user.email);
+        if (!product) {
+            return res.status(404).json({ message: 'Product not found' });
+        }
+        log('Fetched product for user:', product);
+        res.json(product);
+    } catch (error) {
+        console.error('Failed to fetch product:', error);
+        res.status(500).json({ message: 'Failed to fetch product.' });
+    }
 });
 
 app.listen(3000, () => {

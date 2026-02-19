@@ -35,10 +35,11 @@ model Product {
    userId Int
    title String
    description String?
-   url String @unique
+   url String
    imageUrl String?
    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-   @@index([userId])
    createdAt DateTime  @default(now())
    updatedAt DateTime  @updatedAt
+   @@index([userId])
+   @@unique([url, userId]) // This ensures a user cannot have the same URL twice
 }
