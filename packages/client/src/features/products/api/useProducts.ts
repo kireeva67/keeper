@@ -4,7 +4,8 @@ import type { Product } from "../../../shared/types/ProductType";
 type ProductContextType = {
     products: Product[];
     loading: boolean;
-    refresh: () => Promise<void>;
+    hasMore: boolean;
+    loadMore: () => void;
     updateProductInState: (product: Product) => void;
     deleteProductFromState: (id: number) => void;
     addProductToState: (product: Product) => void;

@@ -1,26 +1,14 @@
 import { Button, DialogActions, TextField } from "@mui/material";
-import { useState } from "react";
-import { addProduct } from "../api/addProduct";
 import type { Product } from "../../../shared/types/ProductType";
-import { HttpError } from "../../../shared/errors/HTTPError";
-import { updateProduct } from "../api/updateProduct";
+import { useProductForm } from "../api/useProductForm";
 
-type Props = {
+export type FormProps = {
   initialData?: Product; // If exists === edit mode
   onCancel?: () => void;
   onSuccess: (updatedProduct?: Product) => void;
 };
 
-interface UseProductFormReturn {
-  values: Product;
-  submitting: boolean;
-  urlError: string | null;
-  setField: <K extends keyof Product>(key: K, value: Product[K]) => void;
-  setUrlError: (val: string | null) => void;
-  handleSubmit: (event: React.FormEvent<HTMLFormElement>) => Promise<void>;
-}
-
-export function ProductForm({ initialData, onCancel, onSuccess }: Props) {
+export function ProductForm({ initialData, onCancel, onSuccess }: FormProps) {
   const isEdit = Boolean(initialData);
   const { values, setField, submitting, handleSubmit, urlError, setUrlError } = useProductForm({ initialData, onSuccess });
 
@@ -70,49 +58,4 @@ export function ProductForm({ initialData, onCancel, onSuccess }: Props) {
       </DialogActions>
     </form>
   );
-}
-
-function useProductForm({ initialData, onSuccess }: Props): UseProductFormReturn {
-  const [values, setValues] = useState<Product>(initialData || { title: "", url: "", description: "", id: 0 });
-  const [submitting, setSubmitting] = useState(false);
-  const [urlError, setUrlError] = useState<string | null>(null);
-
-  function setField<K extends keyof Product>(key: K, value: Product[K]) {
-    setValues((v) => ({ ...v, [key]: value }));
-  }
-
-  async function submit() {
-    if (submitting) {
-      return;
-    }
-    setSubmitting(true);
-    setUrlError(null);
-    try {
-      if (initialData) {
-        const updated = await updateProduct(initialData.id, values);
-        onSuccess(updated);
-      } else {
-        const newProduct = await addProduct(values);
-        onSuccess(newProduct);
-      }
-    } catch (err) {
-      if (err instanceof HttpError && err.status === 401) {
-        return;
-      }
-      if (err instanceof HttpError && err.status === 409) {
-        setUrlError("You already have a product with this URL.");
-      } else {
-        alert("An unexpected error occurred.");
-      }
-    } finally {
-      setSubmitting(false);
-    }
-  }
-
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    await submit();
-  }
-
-  return { values, setField, submitting, handleSubmit, urlError, setUrlError };
 }

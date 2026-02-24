@@ -1,25 +1,34 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import type { Product } from '../../../shared/types/ProductType';
-import { getProducts as fetchProductsApi } from '../api/getPoducts';
 import { ProductContext } from '../api/useProducts';
-
-//TODO use for EDIT< DELETE< CREATE instead of passing handlers down, also add loading and error states to context
-
+import { http } from '../../../shared/api/http';
 
 export const ProductProvider = ({ children }: { children: React.ReactNode }) => {
     const [products, setProducts] = useState<Product[]>([]);
+    const [cursor, setCursor] = useState<number | null>(null);
+    const [hasMore, setHasMore] = useState(true);
     const [loading, setLoading] = useState(false);
+    const loadingRef = useRef(false);
 
-    const refresh = useCallback(async () => {
+    const loadMore = useCallback(async () => {
+        if (loadingRef.current || !hasMore) return;
+        loadingRef.current = true;
         setLoading(true);
+
         try {
-            const data = await fetchProductsApi();
-            setProducts(data);
-        } catch (error) {
-            console.error("Failed to load products", error);
+            const { products, nextCursor } = await http<{ products: Product[]; nextCursor: number | null }>(
+                `/api/products${cursor ? `?cursor=${cursor}` : ''}`);
+            setProducts(prev => [...prev, ...products]);
+            setCursor(nextCursor);
+            setHasMore(nextCursor !== null);
         } finally {
             setLoading(false);
+            loadingRef.current = false;
         }
+    }, [cursor, hasMore]);
+
+    useEffect(() => {
+        loadMore();
     }, []);
 
     const updateProductInState = (updated: Product) => {
@@ -31,14 +40,15 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
     };
 
     const addProductToState = (newProduct: Product) => {
-        setProducts(prev => [...prev, newProduct]);
+        setProducts(prev => [newProduct, ...prev]);
     };
 
     return (
         <ProductContext.Provider value={{
             products,
             loading,
-            refresh,
+            hasMore,
+            loadMore,
             updateProductInState,
             deleteProductFromState,
             addProductToState

@@ -1,19 +1,13 @@
 import { AppBar, Fab, Toolbar, Typography } from '@mui/material';
-import { useEffect } from 'react';
 import AddIcon from "@mui/icons-material/Add";
 import { useNavigate } from 'react-router-dom';
 import { PRODUCTS_NEW_ROUTE } from '../../auth/config/authURLS';
-import { CardsGrid } from '../cards/CardsGrid';
-import { ProductCard } from '../cards/ProductCard';
+import { ProductList } from '../list/ProductsList';
 import { useProducts } from '../api/useProducts';
 
 export default function ProductsPage() {
-    const { products, refresh } = useProducts();
+    const { products } = useProducts();
     const navigate = useNavigate();
-
-    useEffect(() => {
-        refresh();
-    }, [refresh]);
 
     return (
         <>
@@ -29,9 +23,7 @@ export default function ProductsPage() {
                 </Toolbar>
             </AppBar>
 
-            <CardsGrid>
-                {products.map((p) => (<ProductCard key={p.id} product={p} />))}
-            </CardsGrid>
+            <ProductList />
 
             <Fab
                 color="primary"

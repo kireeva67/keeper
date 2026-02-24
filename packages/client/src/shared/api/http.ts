@@ -17,7 +17,10 @@ export async function http<T>(path: string, init?: RequestInit): Promise<T> {
         onUnauthorized();
         throw new HttpError(401);
     }
-    if (!res.ok) throw new HttpError(res.status); //TODO add check that link is not unique!!!
+    if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        throw new HttpError(res.status, body?.message);
+    }
     if (res.status === 204) return undefined as T;
     return res.json() as Promise<T>;
 }

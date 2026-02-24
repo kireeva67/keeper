@@ -12,7 +12,8 @@ import cors from "cors";
 import { requireAuth } from './middleware/CookieMiddleware';
 import { getMetadata } from '../utils/getMetadata';
 import { Prisma } from '../generated/prisma';
-
+import { isSafeUrl } from '../utils/isSafeUrl';
+import { addProductLimiter } from './middleware/productLimiter';
 
 dotenv.config();
 const app = express();
@@ -30,7 +31,6 @@ if (process.env.SESSION_SECRET) {
 
 // Initialize Passport
 app.use(passport.initialize());
-app.use(passport.session());
 
 // Set up Google Strategy
 if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
@@ -40,8 +40,6 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
         callbackURL: `${process.env.API_URL}/auth/google/callback`
     },
         async function (accessToken, refreshToken, profile, done) {
-            console.log(profile);
-
             const email = profile.emails?.[0]?.value?.toLowerCase() ?? null;
             const isVerified = profile.emails?.[0]?.verified;
             if (!email || !isVerified) {
@@ -87,19 +85,25 @@ app.get('/auth/google/callback',
 app.get(`/api/products`, requireAuth, async (req, res) => {
     try {
         const user = (req as any).user;
-        const products = await prismaController.getProductsForUser(user.email);
+        const limit = 10;
+        const cursor = req.query.cursor ? parseInt(req.query.cursor as string) : null;
+        const products = await prismaController.getProductsForUser(user.email, limit, cursor);
+        const nextCursor = products.length === limit ? products[products.length - 1].id : null;
         log('Fetched products for user:', products);
-        res.json(products);
+        res.json({ products, nextCursor });
     } catch (error) {
         console.error('Failed to fetch products:', error);
         res.status(500).json({ message: 'Could not load your products.' });
     }
 });
 
-app.post(`/api/products`, requireAuth, async (req, res) => {
+app.post(`/api/products`, requireAuth, addProductLimiter, async (req, res) => {
     try {
         const user = (req as any).user;
         const body: TTableProductData = req.body;
+        if (!isSafeUrl(body.url)) {
+            return res.status(400).json({ message: 'Invalid URL.' });
+        }
         const existingProduct = await prismaController.findProductByUrl(body.url, user.email);
         if (existingProduct) {
             return res.status(409).json({
@@ -175,6 +179,13 @@ app.get(`/api/products/:id`, requireAuth, async (req, res) => {
         console.error('Failed to fetch product:', error);
         res.status(500).json({ message: 'Failed to fetch product.' });
     }
+});
+
+app.delete('/auth/session', requireAuth, async (req, res) => {
+    //TODO add logout flow on frontend side
+    await prismaController.deleteSession((req as any).sessionId);
+    res.clearCookie('sid');
+    res.json(true);
 });
 
 app.listen(3000, () => {

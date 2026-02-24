@@ -68,16 +68,19 @@ export class PrismaController {
         });
     }
 
-    public async getProductsForUser(email: string) {
+    public async getProductsForUser(email: string, limit: number, cursor: number | null) {
         return await prisma.product.findMany({
             where: {
                 user: {
                     email: email
                 }
             },
-            orderBy: {
-                createdAt: 'desc'
-            }
+            take: limit,
+            ...(cursor && {
+                skip: 1,
+                cursor: { id: cursor }
+            }),
+            orderBy: { id: 'desc' }
         });
     }
 
@@ -134,6 +137,10 @@ export class PrismaController {
 
             }
         });
+    }
+
+    public async deleteSession(id: number) {
+        return await prisma.session.delete({ where: { id } });
     }
 }
 
