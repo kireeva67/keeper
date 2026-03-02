@@ -16,6 +16,7 @@ model User {
  password String
  sessions Session[]
  products Product[]
+ categories Category[]
  createdAt DateTime  @default(now())
  updatedAt DateTime  @updatedAt
 }
@@ -37,9 +38,20 @@ model Product {
    description String?
    url String
    imageUrl String?
+   categoryId Int @default(1)
+   category Category @relation(fields: [categoryId], references: [id])
    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
    createdAt DateTime  @default(now())
    updatedAt DateTime  @updatedAt
    @@index([userId])
    @@unique([url, userId]) // This ensures a user cannot have the same URL twice
+}
+
+model Category {
+   id Int @id @default(autoincrement())
+   userId Int?           // null = system default, set = user custom
+   name String
+   products Product[]
+   user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+   @@index([userId])
 }

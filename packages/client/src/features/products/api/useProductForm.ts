@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { updateProduct } from "./updateProduct";
-import type { Product } from "../../../shared/types/ProductType";
+import { type Product } from "../../../shared/types/ProductType";
 import { addProduct } from "./addProduct";
 import { HttpError } from "../../../shared/errors/HTTPError";
 import type { FormProps } from "../dialog/ProductForm";
+import { CATEGORY_ID, CategoryName } from "../../../shared/types/CategoryType";
 
 interface UseProductFormReturn {
     values: Product;
@@ -15,7 +16,7 @@ interface UseProductFormReturn {
 }
 
 export function useProductForm({ initialData, onSuccess }: FormProps): UseProductFormReturn {
-    const [values, setValues] = useState<Product>(initialData || { title: "", url: "", description: "", id: 0 });
+    const [values, setValues] = useState<Product>(initialData || { title: "", url: "", description: "", id: 0, category: { id: CATEGORY_ID[CategoryName.OTHER], name: CategoryName.OTHER } });
     const [submitting, setSubmitting] = useState(false);
     const [urlError, setUrlError] = useState<string | null>(null);
 

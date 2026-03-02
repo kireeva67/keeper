@@ -1,6 +1,8 @@
 import { Button, DialogActions, TextField } from "@mui/material";
 import type { Product } from "../../../shared/types/ProductType";
 import { useProductForm } from "../api/useProductForm";
+import CategoryPicker from "../categories/CategoryPicker";
+import { useCategories } from "../api/useCategories";
 
 export type FormProps = {
   initialData?: Product; // If exists === edit mode
@@ -11,6 +13,7 @@ export type FormProps = {
 export function ProductForm({ initialData, onCancel, onSuccess }: FormProps) {
   const isEdit = Boolean(initialData);
   const { values, setField, submitting, handleSubmit, urlError, setUrlError } = useProductForm({ initialData, onSuccess });
+  const { categories } = useCategories();
 
   return (
     <form onSubmit={handleSubmit}>
@@ -47,6 +50,13 @@ export function ProductForm({ initialData, onCancel, onSuccess }: FormProps) {
         sx={{ mt: 2 }}
         helperText={`${values.description?.length}/100`}
       />
+
+      <CategoryPicker
+        categories={categories}
+        value={values.category.id}
+        onChange={(id) => setField("category", categories.find(c => c.id === id)!)}
+      />
+
 
       <DialogActions sx={{ px: 0, pt: 2 }}>
         <Button onClick={onCancel} disabled={submitting}>

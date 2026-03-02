@@ -80,7 +80,8 @@ export class PrismaController {
                 skip: 1,
                 cursor: { id: cursor }
             }),
-            orderBy: { id: 'desc' }
+            orderBy: { id: 'desc' },
+            include: { category: true }
         });
     }
 
@@ -96,7 +97,15 @@ export class PrismaController {
 
     public async createProduct(email: string, data: TTableProductData) {
         return await prisma.product.create({
-            data: { user: { connect: { email: email } }, title: data.title, description: data.description || "", url: data.url, imageUrl: data.imageUrl },
+            data: {
+                user: { connect: { email: email } },
+                title: data.title,
+                description: data.description || "",
+                url: data.url,
+                imageUrl: data.imageUrl,
+                category: { connect: { id: data.categoryId } }
+            },
+            include: { category: true },
         });
     }
 
@@ -121,8 +130,10 @@ export class PrismaController {
             },
             data: {
                 title: data.title,
-                description: data.description || ""
+                description: data.description || "",
+                category: { connect: { id: data.categoryId } },
             },
+            include: { category: true },
         });
     }
 
@@ -134,6 +145,7 @@ export class PrismaController {
                     email: email
                 }
             },
+            include: { category: true },
         });
     }
 
@@ -151,6 +163,17 @@ export class PrismaController {
 
     public async deleteSession(id: number) {
         return await prisma.session.delete({ where: { id } });
+    }
+
+    public async getCategoriesForUser(email: string) {
+        return await prisma.category.findMany({
+            where: {
+                OR: [
+                    { userId: null },
+                    { user: { email: email } }
+                ]
+            }
+        });
     }
 }
 

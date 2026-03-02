@@ -20,6 +20,9 @@ import type { Product } from "../../../shared/types/ProductType";
 import { DEFAULT_PRODUCT_IMAGE } from "./DefaultImage";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useProducts } from "../api/useProducts";
+import { Chip } from "@mui/material";
+import { CATEGORY_COLORS } from "../defaults";
+import { useEffect } from "react";
 
 type CardProps = {
     product: Product;
@@ -27,7 +30,7 @@ type CardProps = {
 
 export function ProductCard({ product }: CardProps) {
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-    const { title, imageUrl, url, description, id } = product;
+    const { title, imageUrl, url, description, id, category } = product;
     const menuOpen = Boolean(anchorEl);
     const openMenu = (e: React.MouseEvent<HTMLElement>) => setAnchorEl(e.currentTarget);
     const closeMenu = () => setAnchorEl(null);
@@ -44,15 +47,9 @@ export function ProductCard({ product }: CardProps) {
         closeMenu();
         const success = await deleteProduct(id);
         if (success) {
-            deleteProductFromState(id); // Card disappears instantly
+            deleteProductFromState(id);
         }
     };
-
-    // const handleDelete = () => {
-    //     closeMenu();
-    //     deleteProduct(id);
-    //     onDelete(id);
-    // };
 
     return (
         <Card sx={{ borderRadius: 2 }}>
@@ -92,6 +89,11 @@ export function ProductCard({ product }: CardProps) {
 
             </CardActionArea>
             <CardContent>
+                <Chip
+                    label={category.name}
+                    size="small"
+                    sx={{ bgcolor: CATEGORY_COLORS[category.name], color: '#fff' }}
+                />
                 <Typography variant="body2" color="text.secondary">
                     {description}
                 </Typography>

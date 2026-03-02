@@ -9,4 +9,5 @@ export type TTableProductData = {
     description?: string;
     url: string;
     imageUrl?: string | null;
+    categoryId: number;
 }

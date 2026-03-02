@@ -13,7 +13,7 @@ import { requireAuth } from './middleware/CookieMiddleware';
 import { getMetadata } from '../utils/getMetadata';
 import { Prisma } from '../generated/prisma';
 import { isSafeUrl } from '../utils/isSafeUrl';
-import { addProductLimiter } from './middleware/productLimiter';
+import { addProductLimiter } from './middleware/ProductLimiter';
 
 dotenv.config();
 const app = express();
@@ -184,11 +184,25 @@ app.get(`/api/products/:id`, requireAuth, async (req, res) => {
 });
 
 app.delete('/auth/session', requireAuth, async (req, res) => {
-    //TODO add logout flow on frontend side
+    //TODO add logout flow on frontend side + add login flow without google auth
     await prismaController.deleteSession((req as any).sessionId);
     res.clearCookie('sid');
     res.json(true);
 });
+
+app.get(`/api/categories`, requireAuth, async (req, res) => {
+    //TODO how many categories do we need?
+    try {
+        const user = (req as any).user;
+        const categories = await prismaController.getCategoriesForUser(user.email);
+        log('Fetched categories for user:', categories);
+        res.json(categories);
+    } catch (error) {
+        console.error('Failed to fetch categories:', error);
+        res.status(500).json({ message: 'Could not load your categories.' });
+    }
+});
+
 
 app.listen(3000, () => {
     console.log(`Server started on ${process.env.API_URL}`);
