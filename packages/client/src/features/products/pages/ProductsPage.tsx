@@ -1,13 +1,14 @@
 import { AppBar, Fab, Toolbar, Typography } from '@mui/material';
 import AddIcon from "@mui/icons-material/Add";
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { PRODUCTS_NEW_ROUTE } from '../../auth/config/authURLS';
 import { ProductList } from '../list/ProductsList';
 import { useProducts } from '../api/useProducts';
 
 export default function ProductsPage() {
-    const { products } = useProducts();
+    const { total } = useProducts();
     const navigate = useNavigate();
+    const location = useLocation();
 
     return (
         <>
@@ -18,7 +19,7 @@ export default function ProductsPage() {
                     </Typography>
 
                     <Typography variant="body2" color="text.secondary">
-                        Number of products: {products.length}
+                        Number of products: {total}
                     </Typography>
                 </Toolbar>
             </AppBar>
@@ -28,7 +29,7 @@ export default function ProductsPage() {
             <Fab
                 color="primary"
                 aria-label="add product"
-                onClick={() => navigate(PRODUCTS_NEW_ROUTE)}
+                onClick={() => navigate(PRODUCTS_NEW_ROUTE, { state: { background: location } })}
                 sx={{
                     position: "fixed",
                     right: 24,

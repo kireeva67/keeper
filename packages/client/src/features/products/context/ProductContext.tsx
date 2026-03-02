@@ -8,6 +8,7 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
     const [cursor, setCursor] = useState<number | null>(null);
     const [hasMore, setHasMore] = useState(true);
     const [loading, setLoading] = useState(false);
+    const [total, setTotal] = useState(0);
     const loadingRef = useRef(false);
 
     const loadMore = useCallback(async () => {
@@ -16,9 +17,10 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
         setLoading(true);
 
         try {
-            const { products, nextCursor } = await http<{ products: Product[]; nextCursor: number | null }>(
+            const { products, nextCursor, total } = await http<{ products: Product[]; nextCursor: number | null; total: number }>(
                 `/api/products${cursor ? `?cursor=${cursor}` : ''}`);
             setProducts(prev => [...prev, ...products]);
+            setTotal(total);
             setCursor(nextCursor);
             setHasMore(nextCursor !== null);
         } finally {
@@ -37,10 +39,12 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
 
     const deleteProductFromState = (id: number) => {
         setProducts(prev => prev.filter(p => p.id !== id));
+        setTotal(prev => prev - 1);
     };
 
     const addProductToState = (newProduct: Product) => {
         setProducts(prev => [newProduct, ...prev]);
+        setTotal(prev => prev + 1);
     };
 
     return (
@@ -49,6 +53,7 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
             loading,
             hasMore,
             loadMore,
+            total,
             updateProductInState,
             deleteProductFromState,
             addProductToState

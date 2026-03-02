@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Dialog, DialogTitle, DialogContent, CircularProgress, Box } from "@mui/material";
+import { Dialog, DialogTitle, DialogContent, CircularProgress, Box, useTheme, useMediaQuery } from "@mui/material";
 import { ProductForm } from "./ProductForm";
 import type { Product } from "../../../shared/types/ProductType";
 import { getProduct } from "../api/getProduct";
@@ -12,6 +12,8 @@ export default function EditProductDialog() {
     const [product, setProduct] = useState<Product | null>(null);
     const [loading, setLoading] = useState(true);
     const { updateProductInState } = useProducts();
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
     const handleClose = () => navigate(-1);
 
@@ -36,9 +38,13 @@ export default function EditProductDialog() {
 
 
     return (
-        <Dialog open onClose={handleClose} fullWidth maxWidth="sm">
-            <DialogTitle>Edit Product</DialogTitle>
-            <DialogContent>
+        <Dialog open onClose={handleClose} fullWidth maxWidth="sm" fullScreen={isMobile}>
+            <DialogTitle sx={{ display: 'flex', justifyContent: 'center' }}>Edit Product</DialogTitle>
+            <DialogContent sx={isMobile ? {
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+            } : undefined}>
                 {loading ? (
                     <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
                         <CircularProgress />

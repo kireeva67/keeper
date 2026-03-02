@@ -27,7 +27,7 @@ export function ProductForm({ initialData, onCancel, onSuccess }: FormProps) {
         <TextField
           value={values.url}
           onChange={(e) => { setField("url", e.target.value); if (urlError) setUrlError(null) }}
-          slotProps={{ input: { name: "url" } }}
+          slotProps={{ input: { name: "url" }, htmlInput: { autoComplete: "off" } }}
           label="URL"
           fullWidth
           required

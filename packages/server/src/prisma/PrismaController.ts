@@ -84,6 +84,16 @@ export class PrismaController {
         });
     }
 
+    public async countProductsForUser(email: string) {
+        return await prisma.product.count({
+            where: {
+                user: {
+                    email: email
+                }
+            }
+        });
+    }
+
     public async createProduct(email: string, data: TTableProductData) {
         return await prisma.product.create({
             data: { user: { connect: { email: email } }, title: data.title, description: data.description || "", url: data.url, imageUrl: data.imageUrl },

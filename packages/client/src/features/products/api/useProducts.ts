@@ -5,6 +5,7 @@ type ProductContextType = {
     products: Product[];
     loading: boolean;
     hasMore: boolean;
+    total: number;
     loadMore: () => void;
     updateProductInState: (product: Product) => void;
     deleteProductFromState: (id: number) => void;

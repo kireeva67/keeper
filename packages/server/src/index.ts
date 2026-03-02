@@ -87,10 +87,12 @@ app.get(`/api/products`, requireAuth, async (req, res) => {
         const user = (req as any).user;
         const limit = 10;
         const cursor = req.query.cursor ? parseInt(req.query.cursor as string) : null;
-        const products = await prismaController.getProductsForUser(user.email, limit, cursor);
-        const nextCursor = products.length === limit ? products[products.length - 1].id : null;
+        const [products, total] = await Promise.all([
+            prismaController.getProductsForUser(user.email, limit, cursor),
+            prismaController.countProductsForUser(user.email)
+        ]); const nextCursor = products.length === limit ? products[products.length - 1].id : null;
         log('Fetched products for user:', products);
-        res.json({ products, nextCursor });
+        res.json({ products, nextCursor, total });
     } catch (error) {
         console.error('Failed to fetch products:', error);
         res.status(500).json({ message: 'Could not load your products.' });
