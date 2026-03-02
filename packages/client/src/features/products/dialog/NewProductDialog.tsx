@@ -28,7 +28,6 @@ export default function NewProductDialog({ fullPage = false }: { fullPage?: bool
   const handleSuccess = (newProduct?: Product) => {
     if (newProduct) {
       addProductToState(newProduct);
-      //TODO scroll on top not working
       document.getElementById('scroll-container')?.scrollTo({ top: 0, behavior: 'smooth' });
     }
     handleClose();

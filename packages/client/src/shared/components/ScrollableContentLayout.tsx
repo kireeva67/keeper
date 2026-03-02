@@ -4,6 +4,7 @@ import { Outlet } from "react-router-dom";
 export function ScrollContentLayout() {
     return (
         <Container
+            id="scroll-container"
             maxWidth="sm"
             disableGutters // Optional: removes default horizontal padding if you want edge-to-edge
             sx={{
