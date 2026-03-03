@@ -1,4 +1,5 @@
 import { ToggleButton, ToggleButtonGroup } from "@mui/material";
+import { alpha } from "@mui/material/styles";
 import type { Category } from "../../../shared/types/CategoryType";
 import { CATEGORY_COLORS } from "../defaults";
 
@@ -18,9 +19,24 @@ export default function CategoryPicker({ categories, value, onChange }: Props) {
         >
             {categories.map(cat => (
                 <ToggleButton key={cat.id} value={cat.id} size="small"
-                    sx={{ borderRadius: '16px !important', border: '1px solid !important', bgcolor: CATEGORY_COLORS[cat.name], color: '#fff' }}
+                    sx={{
+                        borderRadius: '16px !important',
+                        textTransform: 'none',
+                        height: 32,
+                        px: 1.5,
+                        fontSize: '0.8125rem',
+                        minWidth: 'unset',
+                        bgcolor: 'action.hover',
+                        color: 'text.disabled',
+                        border: '1px solid transparent !important',
+                        '&:hover, &.Mui-selected, &.Mui-selected:hover': {
+                            bgcolor: alpha(CATEGORY_COLORS[cat.name], 0.25),
+                            color: CATEGORY_COLORS[cat.name],
+                            border: `1px solid ${CATEGORY_COLORS[cat.name]} !important`,
+                        },
+                    }}
                 >
-                    {cat.name}
+                    {cat.name.toLowerCase()}
                 </ToggleButton>
             ))}
         </ToggleButtonGroup>

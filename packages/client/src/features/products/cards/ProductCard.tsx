@@ -21,6 +21,7 @@ import { DEFAULT_PRODUCT_IMAGE } from "./DefaultImage";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useProducts } from "../api/useProducts";
 import { Chip } from "@mui/material";
+import { alpha } from "@mui/material/styles";
 import { CATEGORY_COLORS } from "../defaults";
 import { useEffect } from "react";
 
@@ -90,9 +91,9 @@ export function ProductCard({ product }: CardProps) {
             </CardActionArea>
             <CardContent>
                 <Chip
-                    label={category.name}
+                    label={category.name.toLowerCase()}
                     size="small"
-                    sx={{ bgcolor: CATEGORY_COLORS[category.name], color: '#fff' }}
+                    sx={{ bgcolor: alpha(CATEGORY_COLORS[category.name], 0.25), color: CATEGORY_COLORS[category.name], border: `1px solid ${CATEGORY_COLORS[category.name]}` }}
                 />
                 <Typography variant="body2" color="text.secondary">
                     {description}
