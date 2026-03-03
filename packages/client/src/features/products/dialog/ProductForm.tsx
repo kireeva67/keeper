@@ -1,8 +1,11 @@
+import { useState } from "react";
 import { Button, DialogActions, TextField } from "@mui/material";
 import type { Product } from "../../../shared/types/ProductType";
 import { useProductForm } from "../api/useProductForm";
 import CategoryPicker from "../categories/CategoryPicker";
 import { useCategories } from "../api/useCategories";
+import NewCategoryDialog from "./NewCategoryDialog";
+import type { Category } from "../../../shared/types/CategoryType";
 
 export type FormProps = {
   initialData?: Product; // If exists === edit mode
@@ -13,7 +16,13 @@ export type FormProps = {
 export function ProductForm({ initialData, onCancel, onSuccess }: FormProps) {
   const isEdit = Boolean(initialData);
   const { values, setField, submitting, handleSubmit, urlError, setUrlError } = useProductForm({ initialData, onSuccess });
-  const { categories } = useCategories();
+  const { categories, addCategory } = useCategories();
+  const [addCategoryOpen, setAddCategoryOpen] = useState(false);
+
+  const handleCategoryCreated = (category: Category) => {
+    addCategory(category);
+    setField("category", category);
+  };
 
   return (
     <form onSubmit={handleSubmit}>
@@ -55,6 +64,12 @@ export function ProductForm({ initialData, onCancel, onSuccess }: FormProps) {
         categories={categories}
         value={values.category.id}
         onChange={(id) => setField("category", categories.find(c => c.id === id)!)}
+        onAdd={() => setAddCategoryOpen(true)}
+      />
+      <NewCategoryDialog
+        open={addCategoryOpen}
+        onClose={() => setAddCategoryOpen(false)}
+        onCreated={handleCategoryCreated}
       />
 
 

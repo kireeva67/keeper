@@ -16,7 +16,7 @@ interface UseProductFormReturn {
 }
 
 export function useProductForm({ initialData, onSuccess }: FormProps): UseProductFormReturn {
-    const [values, setValues] = useState<Product>(initialData || { title: "", url: "", description: "", id: 0, category: { id: CATEGORY_ID[CategoryName.OTHER], name: CategoryName.OTHER } });
+    const [values, setValues] = useState<Product>(initialData || { title: "", url: "", description: "", id: 0, category: { id: CATEGORY_ID[CategoryName.OTHER], name: CategoryName.OTHER, color: "#797979" } });
     const [submitting, setSubmitting] = useState(false);
     const [urlError, setUrlError] = useState<string | null>(null);
 

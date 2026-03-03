@@ -17,5 +17,9 @@ export function useCategories() {
         fetchCategories();
     }, []);
 
-    return { categories };
+    const addCategory = (category: Category) => {
+        setCategories(prev => [...prev, category]);
+    };
+
+    return { categories, addCategory };
 }

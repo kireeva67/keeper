@@ -1,0 +1,11 @@
+UPDATE "Category" SET "color" = '#ffa952' WHERE "name" = 'Other' AND "userId" IS NULL;
+UPDATE "Category" SET "color" = '#1976d2' WHERE "name" = 'Books' AND "userId" IS NULL;
+UPDATE "Category" SET "color" = '#e53935' WHERE "name" = 'Films' AND "userId" IS NULL;
+UPDATE "Category" SET "color" = '#ec8bde' WHERE "name" = 'Clothes' AND "userId" IS NULL;
+UPDATE "Category" SET "color" = '#7b1fa2' WHERE "name" = 'Beauty' AND "userId" IS NULL;
+UPDATE "Category" SET "color" = '#00897b' WHERE "name" = 'Study' AND "userId" IS NULL;
+UPDATE "Category" SET "color" = '#5c6bc0' WHERE "name" = 'Work' AND "userId" IS NULL;
+UPDATE "Category" SET "color" = '#f4e61e' WHERE "name" = 'Presents' AND "userId" IS NULL;
+UPDATE "Category" SET "color" = '#43a047' WHERE "name" = 'Sport' AND "userId" IS NULL;
+UPDATE "Category" SET "color" = '#3949ab' WHERE "name" = 'Accessories' AND "userId" IS NULL;
+UPDATE "Category" SET "color" = '#00838f' WHERE "name" = 'Electronics' AND "userId" IS NULL;

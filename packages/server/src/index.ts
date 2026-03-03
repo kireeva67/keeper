@@ -5,7 +5,7 @@ import session from 'express-session';
 import dotenv from 'dotenv';
 import { prismaController } from './prisma/PrismaController';
 import { log } from 'node:console';
-import { TTableProductData, TTableUserData } from './types/TableTypes';
+import { TTableCategoryData, TTableProductData, TTableUserData } from './types/TableTypes';
 import cookieParser from "cookie-parser";
 import { TToken } from './types/Token';
 import cors from "cors";
@@ -200,6 +200,25 @@ app.get(`/api/categories`, requireAuth, async (req, res) => {
     } catch (error) {
         console.error('Failed to fetch categories:', error);
         res.status(500).json({ message: 'Could not load your categories.' });
+    }
+});
+
+app.post(`/api/categories`, requireAuth, async (req, res) => {
+    try {
+        const user = (req as any).user;
+        const body: TTableCategoryData = req.body;
+        const existingCategory = await prismaController.findCategoryByName(body.name, user.email);
+        if (existingCategory) {
+            return res.status(409).json({
+                message: 'This category already exists.'
+            });
+        }
+        const category = await prismaController.createCategory(user.email, body);
+        log('Created category for user:', category);
+        res.json(category);
+    } catch (error) {
+        console.error('Failed to create category:', error);
+        res.status(500).json({ message: 'Internal server error' });
     }
 });
 

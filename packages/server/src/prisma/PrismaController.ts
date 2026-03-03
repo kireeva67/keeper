@@ -1,7 +1,7 @@
 import { prisma } from './prisma'
 import { TokenUtil } from '../token/TokenUtil';
 import { TToken } from '../types/Token';
-import { TTableProductData } from '../types/TableTypes';
+import { TTableCategoryData, TTableProductData } from '../types/TableTypes';
 
 export class PrismaController {
 
@@ -173,6 +173,28 @@ export class PrismaController {
                     { user: { email: email } }
                 ]
             }
+        });
+    }
+
+    public async findCategoryByName(name: string, email: string) {
+        return await prisma.category.findFirst({
+            where: {
+                name,
+                user: {
+                    email: email
+                }
+
+            }
+        });
+    }
+
+    public async createCategory(email: string, data: TTableCategoryData) {
+        return await prisma.category.create({
+            data: {
+                name: data.name,
+                color: data.color,
+                user: { connect: { email: email } },
+            },
         });
     }
 }

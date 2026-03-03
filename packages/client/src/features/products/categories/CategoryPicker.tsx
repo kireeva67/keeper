@@ -1,45 +1,75 @@
-import { ToggleButton, ToggleButtonGroup } from "@mui/material";
+import { Box, ToggleButton, ToggleButtonGroup } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
 import { alpha } from "@mui/material/styles";
 import type { Category } from "../../../shared/types/CategoryType";
-import { CATEGORY_COLORS } from "../defaults";
 
 type Props = {
     categories: Category[];
     value: number;
     onChange: (id: number) => void;
+    onAdd?: () => void;
 }
 
-export default function CategoryPicker({ categories, value, onChange }: Props) {
+export default function CategoryPicker({ categories, value, onChange, onAdd }: Props) {
     return (
-        <ToggleButtonGroup
-            value={value}
-            exclusive
-            onChange={(_, newId) => { if (newId) onChange(newId) }}
-            sx={{ flexWrap: 'wrap', gap: 1, mt: 2, }}
-        >
-            {categories.map(cat => (
-                <ToggleButton key={cat.id} value={cat.id} size="small"
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 2, alignItems: 'center' }}>
+            <ToggleButtonGroup
+                value={value}
+                exclusive
+                onChange={(_, newId) => { if (newId) onChange(newId) }}
+                sx={{ flexWrap: 'wrap', gap: 1 }}
+            >
+                {categories.map(cat => (
+                    <ToggleButton key={cat.id} value={cat.id} size="small"
+                        sx={{
+                            borderRadius: '16px !important',
+                            textTransform: 'none',
+                            height: 32,
+                            px: 1.5,
+                            fontSize: '0.8125rem',
+                            minWidth: 'unset',
+                            bgcolor: 'action.hover',
+                            color: 'text.disabled',
+                            border: '1px solid transparent !important',
+                            '&:hover, &.Mui-selected, &.Mui-selected:hover': {
+                                bgcolor: alpha(cat.color, 0.25),
+                                color: cat.color,
+                                border: `1px solid ${cat.color} !important`,
+                            },
+                        }}
+                    >
+                        {cat.name.toLowerCase()}
+                    </ToggleButton>
+                ))}
+            </ToggleButtonGroup>
+            {onAdd && (
+                <Box
+                    component="button"
+                    type="button"
+                    onClick={onAdd}
                     sx={{
-                        borderRadius: '16px !important',
-                        textTransform: 'none',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 0.5,
                         height: 32,
                         px: 1.5,
-                        fontSize: '0.8125rem',
-                        minWidth: 'unset',
-                        bgcolor: 'action.hover',
+                        borderRadius: '16px',
+                        border: '1px dashed',
+                        borderColor: 'text.disabled',
+                        bgcolor: 'transparent',
                         color: 'text.disabled',
-                        border: '1px solid transparent !important',
-                        '&:hover, &.Mui-selected, &.Mui-selected:hover': {
-                            bgcolor: alpha(CATEGORY_COLORS[cat.name], 0.25),
-                            color: CATEGORY_COLORS[cat.name],
-                            border: `1px solid ${CATEGORY_COLORS[cat.name]} !important`,
+                        fontSize: '0.8125rem',
+                        cursor: 'pointer',
+                        textTransform: 'none',
+                        '&:hover': {
+                            borderColor: 'text.primary',
+                            color: 'text.primary',
                         },
                     }}
                 >
-                    {cat.name.toLowerCase()}
-                </ToggleButton>
-            ))}
-        </ToggleButtonGroup>
-
+                    <AddIcon sx={{ fontSize: 16 }} />
+                </Box>
+            )}
+        </Box>
     );
 }

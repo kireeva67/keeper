@@ -11,3 +11,8 @@ export type TTableProductData = {
     imageUrl?: string | null;
     categoryId: number;
 }
+
+export type TTableCategoryData = {
+    name: string;
+    color: string;
+}
