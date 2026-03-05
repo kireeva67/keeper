@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { checkAuth } from "../api/checkAuth";
 import { AuthContext } from "../api/useAuth";
+import { http } from "../../../shared/api/http";
 
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -17,7 +18,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  function logout() {
+  async function logout() {
+    await http(`/auth/session`, {
+      method: "DELETE",
+    });
     setAuthenticated(false);
   }
 

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { updateProduct } from "./updateProduct";
-import { type Product } from "../../../shared/types/ProductType";
+import { type Product, } from "../../../shared/types/ProductType";
 import { addProduct } from "./addProduct";
 import { HttpError } from "../../../shared/errors/HTTPError";
 import type { FormProps } from "../dialog/ProductForm";

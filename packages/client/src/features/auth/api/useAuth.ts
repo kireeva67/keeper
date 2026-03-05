@@ -1,11 +1,10 @@
-
 import { useContext, createContext } from "react";
 
 type AuthCtx = {
     loading: boolean;
     isAuthenticated: boolean;
     setAuthenticated: (v: boolean) => void;
-    logout: () => void;
+    logout: () => Promise<void>;
 };
 
 export const AuthContext = createContext<AuthCtx | null>(null);

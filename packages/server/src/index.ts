@@ -65,22 +65,28 @@ passport.deserializeUser((user: Express.User, done) => {
 app.get('/auth/google',
     passport.authenticate('google', { scope: ['profile', 'email'] }));
 
-app.get('/auth/google/callback',
-    passport.authenticate('google', { failureRedirect: '/login' }),
-    async function (req, res) {
-        const user = req.user as TTableUserData;
-        const token: TToken = await prismaController.createSession(user.email);
-        log('Created session token:', token);
-        res.cookie("sid", token.token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production", // only over HTTPS in prod
-            sameSite: "lax",                           // good default for OAuth redirects
-            path: "/",                                 // send for all routes
-            expires: token.validTo
-        });
-        log('Set session cookie', res.cookie);
-        res.redirect(`${process.env.CLIENT_URL}/products`);
+app.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/login' }), async (req, res) => {
+    const user = req.user as TTableUserData;
+    const token: TToken = await prismaController.createSession(user.email);
+    log('Created session token:', token);
+    res.cookie("sid", token.token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production", // only over HTTPS in prod
+        sameSite: "lax",                           // good default for OAuth redirects
+        path: "/",                                 // send for all routes
+        expires: token.validTo
     });
+    log('Set session cookie', res.cookie);
+    res.redirect(`${process.env.CLIENT_URL}/products`);
+});
+
+//TODO add login flow without google auth
+
+app.delete('/auth/session', requireAuth, async (req, res) => {
+    await prismaController.deleteSession((req as any).sessionId);
+    res.clearCookie('sid');
+    res.json(true);
+});
 
 app.get(`/api/products`, requireAuth, async (req, res) => {
     try {
@@ -183,13 +189,6 @@ app.get(`/api/products/:id`, requireAuth, async (req, res) => {
     }
 });
 
-app.delete('/auth/session', requireAuth, async (req, res) => {
-    //TODO add logout flow on frontend side + add login flow without google auth
-    await prismaController.deleteSession((req as any).sessionId);
-    res.clearCookie('sid');
-    res.json(true);
-});
-
 app.get(`/api/categories`, requireAuth, async (req, res) => {
     //TODO how many categories do we need?
     try {
@@ -222,6 +221,10 @@ app.post(`/api/categories`, requireAuth, async (req, res) => {
     }
 });
 
+app.get('/api/me', requireAuth, (req, res) => {
+    log('Fetching current user info:', (req as any).user);
+    res.json((req as any).user);
+});
 
 app.listen(3000, () => {
     console.log(`Server started on ${process.env.API_URL}`);

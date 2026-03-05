@@ -22,13 +22,14 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useProducts } from "../api/useProducts";
 import { Chip } from "@mui/material";
 import { alpha } from "@mui/material/styles";
+import { useState } from "react";
 
 type CardProps = {
     product: Product;
 };
 
 export function ProductCard({ product }: CardProps) {
-    const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const { title, imageUrl, url, description, id, category } = product;
     const menuOpen = Boolean(anchorEl);
     const openMenu = (e: React.MouseEvent<HTMLElement>) => setAnchorEl(e.currentTarget);

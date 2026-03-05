@@ -20,4 +20,9 @@ export const theme = createTheme({
     typography: {
         fontFamily: `"Inter", "Roboto", "Helvetica", "Arial", sans-serif`,
     },
+    palette: {
+        primary: {
+            main: "#643380ff",
+        },
+    },
 });
