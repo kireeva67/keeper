@@ -5,7 +5,8 @@ export default function CenteredLayout() {
   return (
     <Box
       sx={{
-        minHeight: "100vh",
+        height: "100vh",
+        overflow: "hidden",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",

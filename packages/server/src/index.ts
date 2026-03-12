@@ -1,5 +1,5 @@
 import express from 'express';
-import passport from 'passport';
+import passport, { use } from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import session from 'express-session';
 import dotenv from 'dotenv';
@@ -13,6 +13,7 @@ import { requireAuth } from './middleware/CookieMiddleware';
 import { getMetadata } from '../utils/getMetadata';
 import { Prisma } from '../generated/prisma';
 import { isSafeUrl } from '../utils/isSafeUrl';
+import { hashPassword, validateNewPassword, verifyCurrentPassword } from '../utils/password';
 import { addProductLimiter } from './middleware/ProductLimiter';
 
 dotenv.config();
@@ -222,8 +223,28 @@ app.post(`/api/categories`, requireAuth, async (req, res) => {
 });
 
 app.get('/api/me', requireAuth, (req, res) => {
+    const user = (req as any).user as TTableUserData;
+    user.hasPassword = !!user.password;
     log('Fetching current user info:', (req as any).user);
     res.json((req as any).user);
+});
+
+app.put(`/api/me`, requireAuth, async (req, res) => {
+    try {
+        const user = (req as any).user;
+        const body: { newPassword: string; currentPassword: string } = req.body;
+        const currentError = await verifyCurrentPassword(user.password ?? null, body.currentPassword);
+        if (currentError) return res.status(400).json({ error: currentError });
+
+        const newError = validateNewPassword(body.newPassword);
+        if (newError) return res.status(400).json({ error: newError });
+
+        const hash = await hashPassword(body.newPassword);
+        await prismaController.updatePassword(user.email, hash);
+        res.json(true);
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to update password.' });
+    }
 });
 
 app.listen(3000, () => {

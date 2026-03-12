@@ -1,19 +1,18 @@
 import { AppBar, Avatar, Fab, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, Toolbar, Typography } from '@mui/material';
 import AddIcon from "@mui/icons-material/Add";
 import { useLocation, useNavigate } from 'react-router-dom';
-import { PRODUCTS_NEW_ROUTE } from '../../auth/config/authURLS';
+import { PRODUCTS_NEW_ROUTE, SETTINGS_ROUTE } from '../../auth/config/authURLS';
 import { ProductList } from '../list/ProductsList';
 import { useProducts } from '../api/useProducts';
 
 import SettingsIcon from "@mui/icons-material/Settings";
 import LogOutIcon from "@mui/icons-material/LogOut";
 import { useState } from 'react';
-import { useUser } from '../api/useUser';
 import { useAuth } from '../../auth/api/useAuth';
+import { UserAvatar } from '../../../shared/components/UserAvatar';
 
 export default function ProductsPage() {
     const { total } = useProducts();
-    const { email } = useUser();
     const { logout } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
@@ -32,11 +31,11 @@ export default function ProductsPage() {
 
                     <>
                         <IconButton onClick={openMenu} sx={{ p: 0 }}>
-                            <Avatar sx={{ bgcolor: 'primary.main' }}>{email[0]?.toUpperCase()}</Avatar>
+                            <UserAvatar />
                         </IconButton>
 
                         <Menu anchorEl={anchorEl} open={menuOpen} onClose={closeMenu}>
-                            <MenuItem >
+                            <MenuItem onClick={() => navigate(SETTINGS_ROUTE)}>
                                 <ListItemIcon>
                                     <SettingsIcon fontSize="small" />
                                 </ListItemIcon>

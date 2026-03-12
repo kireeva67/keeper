@@ -197,6 +197,13 @@ export class PrismaController {
             },
         });
     }
+
+    public async updatePassword(email: string, password: string) {
+        return await prisma.user.update({
+            where: { email },
+            data: { password },
+        });
+    }
 }
 
 export const prismaController = new PrismaController();
