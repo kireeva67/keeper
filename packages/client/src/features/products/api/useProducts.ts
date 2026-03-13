@@ -1,5 +1,6 @@
 import { createContext, useContext } from "react";
 import type { Product } from "../../../shared/types/ProductType";
+import type { Category } from "../../../shared/types/CategoryType";
 
 type ProductContextType = {
     products: Product[];
@@ -10,6 +11,7 @@ type ProductContextType = {
     updateProductInState: (product: Product) => void;
     deleteProductFromState: (id: number) => void;
     addProductToState: (product: Product) => void;
+    reassignCategoryInState: (fromCategoryId: number, toCategory: Category) => void;
 };
 
 export const ProductContext = createContext<ProductContextType | undefined>(undefined);

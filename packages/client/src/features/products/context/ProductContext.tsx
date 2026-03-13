@@ -2,6 +2,7 @@ import React, { useState, useCallback, useRef, useEffect } from 'react';
 import type { Product } from '../../../shared/types/ProductType';
 import { ProductContext } from '../api/useProducts';
 import { http } from '../../../shared/api/http';
+import { type Category } from '../../../shared/types/CategoryType';
 
 export const ProductProvider = ({ children }: { children: React.ReactNode }) => {
     const [products, setProducts] = useState<Product[]>([]);
@@ -47,6 +48,12 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
         setTotal(prev => prev + 1);
     };
 
+    const reassignCategoryInState = (fromCategoryId: number, toCategory: Category) => {
+        setProducts(prev => prev.map(p =>
+            p.category.id === fromCategoryId ? { ...p, category: toCategory } : p
+        ));
+    };
+
     return (
         <ProductContext.Provider value={{
             products,
@@ -56,7 +63,8 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
             total,
             updateProductInState,
             deleteProductFromState,
-            addProductToState
+            addProductToState,
+            reassignCategoryInState
         }}>
             {children}
         </ProductContext.Provider>

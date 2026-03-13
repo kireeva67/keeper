@@ -198,6 +198,18 @@ export class PrismaController {
         });
     }
 
+    public async deleteCategory(id: number, email: string) {
+        await prisma.$transaction([
+            prisma.product.updateMany({
+                where: { categoryId: id },
+                data: { categoryId: 1 },
+            }),
+            prisma.category.delete({
+                where: { id, user: { email } },
+            }),
+        ]);
+    }
+
     public async updatePassword(email: string, password: string) {
         return await prisma.user.update({
             where: { email },

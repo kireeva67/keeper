@@ -222,6 +222,23 @@ app.post(`/api/categories`, requireAuth, async (req, res) => {
     }
 });
 
+app.delete(`/api/categories/:id`, requireAuth, async (req, res) => {
+    try {
+        const user = (req as any).user;
+        const categoryId = parseInt(`${req.params.id}`);
+        if (isNaN(categoryId)) {
+            return res.status(400).json({ message: 'Invalid category ID' });
+        }
+        log('Attempting to delete category for user:', user, 'categoryId:', req.params);
+        await prismaController.deleteCategory(categoryId, user.email);
+        res.json(true);
+    } catch (error) {
+        console.error('Failed to delete category:', error);
+        res.status(500).json({ message: 'Failed to delete category.' });
+    }
+
+});
+
 app.get('/api/me', requireAuth, (req, res) => {
     const user = (req as any).user as TTableUserData;
     user.hasPassword = !!user.password;

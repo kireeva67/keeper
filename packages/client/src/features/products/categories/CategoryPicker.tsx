@@ -1,7 +1,7 @@
 import { Box, ToggleButton, ToggleButtonGroup } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import { alpha } from "@mui/material/styles";
 import type { Category } from "../../../shared/types/CategoryType";
+import { categoryChipSx } from "./categoryChipSx";
 
 type Props = {
     categories: Category[];
@@ -32,8 +32,7 @@ export default function CategoryPicker({ categories, value, onChange, onAdd }: P
                             color: 'text.disabled',
                             border: '1px solid transparent !important',
                             '&:hover, &.Mui-selected, &.Mui-selected:hover': {
-                                bgcolor: alpha(cat.color, 0.25),
-                                color: cat.color,
+                                ...categoryChipSx(cat.color),
                                 border: `1px solid ${cat.color} !important`,
                             },
                         }}
