@@ -19,9 +19,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   async function logout() {
-    await http(`/auth/session`, {
-      method: "DELETE",
-    });
+    try {
+      await http(`/auth/session`, { method: "DELETE" });
+    } catch {
+      // session may already be expired or the fetch aborted by navigation
+    }
     setAuthenticated(false);
   }
 

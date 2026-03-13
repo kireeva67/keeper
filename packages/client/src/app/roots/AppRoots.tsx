@@ -21,6 +21,7 @@ export function UnauthorizedBridge() {
 
     useEffect(() => {
         setOnUnauthorized(() => {
+            setOnUnauthorized(null); // prevent re-entry from logout's own DELETE call
             logout();
             navigate(LOGIN_ROUTE, { replace: true });
         });

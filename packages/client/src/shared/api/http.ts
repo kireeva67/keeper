@@ -15,7 +15,7 @@ export async function http<T>(path: string, init?: RequestInit): Promise<T> {
     });
     if (res.status === 401 && onUnauthorized) {
         onUnauthorized();
-        throw new HttpError(401);
+        return new Promise<T>(() => { });
     }
     if (!res.ok) {
         const body = await res.json().catch(() => null);

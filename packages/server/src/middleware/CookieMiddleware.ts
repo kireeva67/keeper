@@ -8,7 +8,7 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
     const raw = req.cookies?.sid;
     log('Auth middleware - session id from cookie:', raw);
     if (!raw) {
-      if (req.path.startsWith('/api')) {
+      if (req.path.startsWith('/api') || req.path.startsWith('/auth')) {
         return res.status(401).json({ error: 'Unauthorized' });
       } else {
         res.redirect(`${process.env.CLIENT_URL}${LOGIN_ROUTE}`);
