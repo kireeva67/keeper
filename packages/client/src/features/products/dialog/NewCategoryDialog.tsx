@@ -35,7 +35,7 @@ export default function NewCategoryDialog({ open, onClose, onCreated }: Props) {
         try {
             const created = await addCategory({ name, color });
             onCreated(created);
-            onClose();
+            handleClose();
         } catch (err) {
             setError(err instanceof Error ? err.message : "Failed to create category.");
         } finally {
