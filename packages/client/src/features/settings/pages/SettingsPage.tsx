@@ -33,14 +33,16 @@ export default function SettingsPage() {
                 <Typography variant="h6">Settings</Typography>
             </Box>
             <ProfileSection />
-            <Box>
-                <Typography variant="overline" color="text.secondary">My categories</Typography>
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 2 }}>
-                    {customCategories.map(cat => (
-                        <CategoryTag key={cat.id} cat={cat} onDelete={() => setPendingDeleteId(cat.id)} />
-                    ))}
+            {customCategories.length > 0 && (
+                <Box>
+                    <Typography variant="overline" color="text.secondary">My categories</Typography>
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 2 }}>
+                        {customCategories.map(cat => (
+                            <CategoryTag key={cat.id} cat={cat} onDelete={() => setPendingDeleteId(cat.id)} />
+                        ))}
+                    </Box>
                 </Box>
-            </Box>
+            )}
 
             <ConfirmDeletionDialog
                 open={Boolean(pendingCategory)}
