@@ -41,7 +41,6 @@ export default function LoginPage() {
         }
     };
 
-
     return (
         <Container maxWidth="sm" sx={{ mt: 8 }}>
             <Typography variant="h4" gutterBottom>
