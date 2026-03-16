@@ -216,6 +216,12 @@ export class PrismaController {
             data: { password },
         });
     }
+
+    public async findUser(email: string) {
+        return await prisma.user.findUnique({
+            where: { email }
+        });
+    }
 }
 
 export const prismaController = new PrismaController();

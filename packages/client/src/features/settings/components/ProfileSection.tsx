@@ -4,15 +4,15 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import { useUser } from "../../../shared/api/useUser";
 import { UserAvatar } from "../../../shared/components/UserAvatar";
+import { validatePassword } from "../../../shared/utils/validatePassword";
 
 export function ProfileSection() {
     const { email, hasPassword, updatePassword } = useUser();
     const [currentPassword, setCurrentPassword] = useState("");
     const [newPassword, setNewPassword] = useState("");
-    const [confirmPassword, setConfirmPassword] = useState("");
-    const [errors, setErrors] = useState<{ current?: string; new?: string; confirm?: string }>({});
+    const [errors, setErrors] = useState<{ current?: string; new?: string }>({});
     const [success, setSuccess] = useState(false);
-    const [show, setShow] = useState({ current: false, new: false, confirm: false });
+    const [show, setShow] = useState({ current: false, new: false });
 
     const toggleShow = (field: keyof typeof show) =>
         setShow(prev => ({ ...prev, [field]: !prev[field] }));
@@ -27,23 +27,19 @@ export function ProfileSection() {
         ),
     });
 
-    const handlePasswordSubmit = async () => {
+    const onSubmit = async () => {
         const next: typeof errors = {};
         if (hasPassword && !currentPassword) next.current = "Required";
-        if (newPassword.length < 8) next.new = "At least 8 characters";
-        else if (!/\d/.test(newPassword)) next.new = "Must contain a number";
-        else if (!/[!@#$%^&*()_+\-={}[\];':"\\|,.<>?]/.test(newPassword)) next.new = "Must contain a special character";
-        if (confirmPassword !== newPassword) next.confirm = "Passwords don't match";
-        if (Object.keys(next).length) { setErrors(next); return; }
-
+        const newError = validatePassword(newPassword);
+        if (newError) next.new = newError;
+        if (Object.keys(next).length) {
+            setErrors(next);
+            return;
+        }
         try {
             await updatePassword(newPassword, hasPassword ? currentPassword : undefined);
             setCurrentPassword("");
             setNewPassword("");
-            setConfirmPassword("");
-            toggleShow("current");
-            toggleShow("new");
-            toggleShow("confirm");
             setErrors({});
             setSuccess(true);
             setTimeout(() => setSuccess(false), 5000);
@@ -77,13 +73,6 @@ export function ProfileSection() {
                     error={!!errors.new} helperText={errors.new}
                     slotProps={{ input: eyeAdornment("new") }}
                 />
-                <TextField
-                    label="Confirm new password" size="small" fullWidth
-                    type={show.confirm ? "text" : "password"}
-                    value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)}
-                    error={!!errors.confirm} helperText={errors.confirm}
-                    slotProps={{ input: eyeAdornment("confirm") }}
-                />
                 <Box sx={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 2 }}>
                     {success && (
                         <Typography
@@ -94,7 +83,7 @@ export function ProfileSection() {
                             Password updated successfully
                         </Typography>
                     )}
-                    <Button variant="contained" onClick={handlePasswordSubmit}>
+                    <Button variant="contained" onClick={onSubmit}>
                         {hasPassword ? "Update password" : "Set password"}
                     </Button>
                 </Box>

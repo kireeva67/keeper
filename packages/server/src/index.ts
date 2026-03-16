@@ -13,8 +13,10 @@ import { requireAuth } from './middleware/CookieMiddleware';
 import { getMetadata } from '../utils/getMetadata';
 import { Prisma } from '../generated/prisma';
 import { isSafeUrl } from '../utils/isSafeUrl';
-import { hashPassword, validateNewPassword, verifyCurrentPassword } from '../utils/password';
+import { hashPassword, validateNewPassword, getPasswordError } from '../utils/password';
 import { addProductLimiter } from './middleware/ProductLimiter';
+import { get } from 'node:http';
+import { getCookieDefaults } from '../utils/getCookie';
 
 dotenv.config();
 const app = express();
@@ -70,23 +72,45 @@ app.get('/auth/google/callback', passport.authenticate('google', { failureRedire
     const user = req.user as TTableUserData;
     const token: TToken = await prismaController.createSession(user.email);
     log('Created session token:', token);
-    res.cookie("sid", token.token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production", // only over HTTPS in prod
-        sameSite: "lax",                           // good default for OAuth redirects
-        path: "/",                                 // send for all routes
-        expires: token.validTo
-    });
+    res.cookie("sid", token.token, getCookieDefaults(token.validTo));
     log('Set session cookie', res.cookie);
     res.redirect(`${process.env.CLIENT_URL}/products`);
 });
 
-//TODO add login flow without google auth
+//TODO add sign up flow 
+
+app.post('/auth/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        const user = await prismaController.findUser(email);
+        log('Login attempt for email:', email, 'found user:', user);
+        if (!user || !user.password) {
+            return res.status(400).json({ message: 'Invalid credentials' });
+        }
+        const passwordError = await getPasswordError(user.password, password);
+        log('Password validation result for email:', email, 'error:', passwordError);
+        if (passwordError) {
+            return res.status(400).json({ message: 'Invalid credentials' });
+        }
+        const token = await prismaController.createSession(user.email);
+        res.cookie("sid", token.token, getCookieDefaults(token.validTo));
+        log('User logged in, session cookie set:', token);
+        res.json(true);
+    } catch (error) {
+        console.error('Failed to login:', error);
+        res.status(500).json({ message: 'Invalid credentials.' });
+    }
+});
 
 app.delete('/auth/session', requireAuth, async (req, res) => {
-    await prismaController.deleteSession((req as any).sessionId);
-    res.clearCookie('sid');
-    res.json(true);
+    try {
+        await prismaController.deleteSession((req as any).sessionId);
+        res.clearCookie('sid');
+        res.json(true);
+    } catch (error) {
+        console.error('Failed to logout:', error);
+        return res.status(500).json({ message: 'Failed to logout.' });
+    }
 });
 
 app.get(`/api/products`, requireAuth, async (req, res) => {
@@ -250,8 +274,8 @@ app.put(`/api/me`, requireAuth, async (req, res) => {
     try {
         const user = (req as any).user;
         const body: { newPassword: string; currentPassword: string } = req.body;
-        const currentError = await verifyCurrentPassword(user.password ?? null, body.currentPassword);
-        if (currentError) return res.status(400).json({ error: currentError });
+        const passwordError = await getPasswordError(user.password ?? null, body.currentPassword);
+        if (passwordError) return res.status(400).json({ error: passwordError });
 
         const newError = validateNewPassword(body.newPassword);
         if (newError) return res.status(400).json({ error: newError });

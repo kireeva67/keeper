@@ -12,8 +12,8 @@ import ProductsPage from "../../features/products/pages/ProductsPage";
 import NewProductDialog from "../../features/products/dialog/NewProductDialog";
 import { ScrollContentLayout } from "../../shared/components/ScrollableContentLayout";
 import EditProductDialog from "../../features/products/dialog/EditProductDialog";
-import { ProductProvider } from "../../features/products/context/ProductContext";
 import SettingsPage from "../../features/settings/pages/SettingsPage";
+import { AuthenticatedLayout } from "../../shared/components/AuthenticatedLayout";
 
 export function UnauthorizedBridge() {
     const navigate = useNavigate();
@@ -40,13 +40,13 @@ export function AppRoutes() {
 
     return (
         <>
-            <ProductProvider>
-                <Routes location={background || location}>
-                    <Route element={<CenteredLayout />} >
-                        <Route path={LOGIN_ROUTE} element={<LoginPage />} />
-                        <Route path={SIGN_UP_ROUTE} element={<SignUpPage />} />
-                    </Route>
-                    <Route element={<ProtectedRoute />}>
+            <Routes location={background || location}>
+                <Route element={<CenteredLayout />} >
+                    <Route path={LOGIN_ROUTE} element={<LoginPage />} />
+                    <Route path={SIGN_UP_ROUTE} element={<SignUpPage />} />
+                </Route>
+                <Route element={<ProtectedRoute />}>
+                    <Route element={<AuthenticatedLayout />}>
                         <Route element={<ScrollContentLayout />} >
                             <Route path={PRODUCTS_ROUTE} element={<ProductsPage />} />
                         </Route>
@@ -56,21 +56,20 @@ export function AppRoutes() {
                             <Route path={SETTINGS_ROUTE} element={<SettingsPage />} />
                         </Route>
                     </Route>
+                </Route>
 
+                <Route path="*" element={<Navigate to={LOGIN_ROUTE} replace />} />
+            </Routes>
 
-                    <Route path="*" element={<Navigate to={LOGIN_ROUTE} replace />} />
+            {/* Modal routes */}
+            {background && (
+                <Routes>
+                    <Route element={<ProtectedRoute />}>
+                        <Route path={PRODUCTS_NEW_ROUTE} element={<NewProductDialog />} />
+                        <Route path={PRODUCT_EDIT_ROUTE} element={<EditProductDialog />} />
+                    </Route>
                 </Routes>
-
-                {/* Modal routes */}
-                {background && (
-                    <Routes>
-                        <Route element={<ProtectedRoute />}>
-                            <Route path={PRODUCTS_NEW_ROUTE} element={<NewProductDialog />} />
-                            <Route path={PRODUCT_EDIT_ROUTE} element={<EditProductDialog />} />
-                        </Route>
-                    </Routes>
-                )}
-            </ProductProvider>
+            )}
         </>
     );
 }

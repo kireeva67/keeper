@@ -10,6 +10,7 @@ export function ProductList() {
         <>
             <CardsGrid>
                 {products.map((p) => {
+                    debugger
                     return <ProductCard key={p.id} product={p} />;
                 })}
 

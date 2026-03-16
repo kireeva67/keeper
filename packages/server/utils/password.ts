@@ -7,7 +7,7 @@ export function validateNewPassword(newPassword: string): string | null {
     return null;
 }
 
-export async function verifyCurrentPassword(
+export async function getPasswordError(
     currentHash: string | null,
     currentPassword: string | undefined
 ): Promise<string | null> {
