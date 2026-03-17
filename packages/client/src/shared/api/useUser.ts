@@ -12,8 +12,8 @@ export function useUser() {
                 const user = await getUser();
                 setHasPassword(user.hasPassword);
                 setEmail(user.email);
-            } catch (error) {
-                console.error("Failed to fetch user email:", error);
+            } catch {
+                // 401s are handled globally by UnauthorizedBridge; ignore transient errors
             }
         };
         fetchEmail();

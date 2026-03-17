@@ -23,6 +23,7 @@ const app = express();
 app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
 app.use(express.json());
 app.use(cookieParser());
+app.use((req, _res, next) => { log(`→ ${req.method} ${req.path}`); next(); });
 
 if (process.env.SESSION_SECRET) {
     app.use(session({
