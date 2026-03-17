@@ -1,10 +1,9 @@
-import { Box, Button, IconButton, InputAdornment, TextField, Typography } from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 import { useState } from "react";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import { useUser } from "../../../shared/api/useUser";
 import { UserAvatar } from "../../../shared/components/UserAvatar";
 import { validatePassword } from "../../../shared/utils/validatePassword";
+import { PasswordTextField } from "../../../shared/components/PasswordTextField";
 
 export function ProfileSection() {
     const { email, hasPassword, updatePassword } = useUser();
@@ -12,20 +11,6 @@ export function ProfileSection() {
     const [newPassword, setNewPassword] = useState("");
     const [errors, setErrors] = useState<{ current?: string; new?: string }>({});
     const [success, setSuccess] = useState(false);
-    const [show, setShow] = useState({ current: false, new: false });
-
-    const toggleShow = (field: keyof typeof show) =>
-        setShow(prev => ({ ...prev, [field]: !prev[field] }));
-
-    const eyeAdornment = (field: keyof typeof show) => ({
-        endAdornment: (
-            <InputAdornment position="end">
-                <IconButton size="small" onClick={() => toggleShow(field)} edge="end">
-                    {show[field] ? <VisibilityIcon fontSize="small" /> : <VisibilityOffIcon fontSize="small" />}
-                </IconButton>
-            </InputAdornment>
-        ),
-    });
 
     const onSubmit = async () => {
         const next: typeof errors = {};
@@ -58,20 +43,16 @@ export function ProfileSection() {
             </Box>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
                 {hasPassword && (
-                    <TextField
+                    <PasswordTextField
                         label="Current password" size="small" fullWidth
-                        type={show.current ? "text" : "password"}
-                        value={currentPassword} onChange={e => setCurrentPassword(e.target.value)}
-                        error={!!errors.current} helperText={errors.current}
-                        slotProps={{ input: eyeAdornment("current") }}
+                        value={newPassword} onChange={e => setNewPassword(e.target.value)}
+                        error={!!errors.new} helperText={errors.new}
                     />
                 )}
-                <TextField
+                <PasswordTextField
                     label="New password" size="small" fullWidth
-                    type={show.new ? "text" : "password"}
                     value={newPassword} onChange={e => setNewPassword(e.target.value)}
                     error={!!errors.new} helperText={errors.new}
-                    slotProps={{ input: eyeAdornment("new") }}
                 />
                 <Box sx={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 2 }}>
                     {success && (

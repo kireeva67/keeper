@@ -7,13 +7,12 @@ import { LOGIN_ROUTE, PRODUCT_EDIT_ROUTE, PRODUCTS_NEW_ROUTE, PRODUCTS_ROUTE, SE
 import CenteredLayout from "../../shared/components/CenteredLayout";
 import SignUpPage from "../../features/auth/pages/SignUpPage";
 import LoginPage from "../../features/auth/pages/LoginPage";
-import { ProtectedRoute } from "../../features/auth/routes/ProtectedRoute";
 import ProductsPage from "../../features/products/pages/ProductsPage";
 import NewProductDialog from "../../features/products/dialog/NewProductDialog";
 import { ScrollContentLayout } from "../../shared/components/ScrollableContentLayout";
 import EditProductDialog from "../../features/products/dialog/EditProductDialog";
 import SettingsPage from "../../features/settings/pages/SettingsPage";
-import { AuthenticatedLayout } from "../../shared/components/AuthenticatedLayout";
+import { ProductProvider } from "../../features/products/context/ProductContext";
 
 export function UnauthorizedBridge() {
     const navigate = useNavigate();
@@ -37,39 +36,45 @@ export function AppRoutes() {
     const location = useLocation();
     const state = location.state as LocationState;
     const background = state?.background;
+    const { isAuthenticated, loading } = useAuth();
 
-    return (
-        <>
-            <Routes location={background || location}>
-                <Route element={<CenteredLayout />} >
+    if (loading) return null;
+
+    if (!isAuthenticated) {
+        return (
+            <Routes>
+                <Route element={<CenteredLayout />}>
                     <Route path={LOGIN_ROUTE} element={<LoginPage />} />
                     <Route path={SIGN_UP_ROUTE} element={<SignUpPage />} />
                 </Route>
-                <Route element={<ProtectedRoute />}>
-                    <Route element={<AuthenticatedLayout />}>
-                        <Route element={<ScrollContentLayout />} >
-                            <Route path={PRODUCTS_ROUTE} element={<ProductsPage />} />
-                        </Route>
-                        <Route element={<CenteredLayout />} >
-                            <Route path={PRODUCTS_NEW_ROUTE} element={<NewProductDialog fullPage />} />
-                            <Route path={PRODUCT_EDIT_ROUTE} element={<EditProductDialog />} />
-                            <Route path={SETTINGS_ROUTE} element={<SettingsPage />} />
-                        </Route>
-                    </Route>
-                </Route>
-
                 <Route path="*" element={<Navigate to={LOGIN_ROUTE} replace />} />
             </Routes>
+        );
+    }
 
-            {/* Modal routes */}
-            {background && (
-                <Routes>
-                    <Route element={<ProtectedRoute />}>
+    return (
+        <ProductProvider>
+            <>
+                <Routes location={background || location}>
+                    <Route element={<ScrollContentLayout />}>
+                        <Route path={PRODUCTS_ROUTE} element={<ProductsPage />} />
+                    </Route>
+                    <Route element={<CenteredLayout />}>
+                        <Route path={PRODUCTS_NEW_ROUTE} element={<NewProductDialog fullPage />} />
+                        <Route path={PRODUCT_EDIT_ROUTE} element={<EditProductDialog />} />
+                        <Route path={SETTINGS_ROUTE} element={<SettingsPage />} />
+                    </Route>
+                    <Route path="*" element={<Navigate to={PRODUCTS_ROUTE} replace />} />
+                </Routes>
+
+                {/* Modal routes */}
+                {background && (
+                    <Routes>
                         <Route path={PRODUCTS_NEW_ROUTE} element={<NewProductDialog />} />
                         <Route path={PRODUCT_EDIT_ROUTE} element={<EditProductDialog />} />
-                    </Route>
-                </Routes>
-            )}
-        </>
+                    </Routes>
+                )}
+            </>
+        </ProductProvider>
     );
 }

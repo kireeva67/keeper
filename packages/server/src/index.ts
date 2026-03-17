@@ -49,7 +49,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
                 return done(new Error("Invalid credantials"));
             };
 
-            const user = await prismaController.upsertUser(email);
+            const user = await prismaController.upsertUser(email, "");
             log('Upserted user:', user);
             return done(null, { password: user.password, email });
         }));
@@ -77,7 +77,28 @@ app.get('/auth/google/callback', passport.authenticate('google', { failureRedire
     res.redirect(`${process.env.CLIENT_URL}/products`);
 });
 
-//TODO add sign up flow 
+app.post('/auth/signup', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        const existingUser = await prismaController.findUser(email);
+        log('Signup attempt for email:', email, 'existing user:', existingUser);
+        if (existingUser) {
+            return res.status(409).json({ message: 'User with this email already exists.' });
+        }
+        const passwordError = validateNewPassword(password);
+        if (passwordError) {
+            return res.status(400).json({ message: passwordError });
+        }
+        const hash = await hashPassword(password);
+        await prismaController.upsertUser(email, hash);
+        const token = await prismaController.createSession(email);
+        res.cookie("sid", token.token, getCookieDefaults(token.validTo));
+        res.json(true);
+    } catch (error) {
+        console.error('Failed to sign up:', error);
+        res.status(500).json({ message: 'Failed to sign up.' });
+    }
+});
 
 app.post('/auth/login', async (req, res) => {
     try {

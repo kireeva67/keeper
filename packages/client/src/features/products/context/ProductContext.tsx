@@ -24,6 +24,8 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
             setTotal(total);
             setCursor(nextCursor);
             setHasMore(nextCursor !== null);
+        } catch {
+            // 401s are handled globally by UnauthorizedBridge; ignore transient errors
         } finally {
             setLoading(false);
             loadingRef.current = false;

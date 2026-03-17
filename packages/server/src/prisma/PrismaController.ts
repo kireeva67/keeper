@@ -11,10 +11,10 @@ export class PrismaController {
         });
     }
 
-    public async upsertUser(email: string) {
+    public async upsertUser(email: string, password: string) {
         return await prisma.user.upsert({
             where: { email },
-            create: { email, password: "" },
+            create: { email, password },
             update: {}
         });
     }
