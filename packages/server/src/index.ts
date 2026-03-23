@@ -10,13 +10,12 @@ import cookieParser from "cookie-parser";
 import { TToken } from './types/Token';
 import cors from "cors";
 import { requireAuth } from './middleware/CookieMiddleware';
-import { getMetadata } from '../utils/getMetadata';
+import { getMetadata } from './utils/getMetadata';
 import { Prisma } from '../generated/prisma';
-import { isSafeUrl } from '../utils/isSafeUrl';
-import { hashPassword, validateNewPassword, getPasswordError } from '../utils/password';
+import { isSafeUrl } from './utils/isSafeUrl';
+import { hashPassword, validateNewPassword, getPasswordError } from './utils/password';
 import { addProductLimiter } from './middleware/ProductLimiter';
-import { get } from 'node:http';
-import { getCookieDefaults } from '../utils/getCookie';
+import { getCookieDefaults } from './utils/getCookie';
 
 dotenv.config();
 const app = express();

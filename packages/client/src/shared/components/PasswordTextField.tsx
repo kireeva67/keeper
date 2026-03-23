@@ -14,7 +14,7 @@ export function PasswordTextField(props: TextFieldProps) {
                 input: {
                     endAdornment: (
                         <InputAdornment position="end">
-                            <IconButton size="small" onClick={() => setShow(s => !s)} edge="end">
+                            <IconButton aria-label="toggle visibility" size="small" onClick={() => setShow(s => !s)} edge="end">
                                 {show ? <VisibilityIcon fontSize="small" /> : <VisibilityOffIcon fontSize="small" />}
                             </IconButton>
                         </InputAdornment>
