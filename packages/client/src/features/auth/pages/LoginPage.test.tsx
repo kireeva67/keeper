@@ -15,6 +15,10 @@ vi.mock('../api/checkCredentials', () => ({
 }));
 
 describe('LoginPage', () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+    });
+
     it('calls setAuthenticated and navigates on successful login', async () => {
         vi.mocked(checkCredentials).mockResolvedValueOnce(true);
         render(<MemoryRouter><LoginPage /></MemoryRouter>);
