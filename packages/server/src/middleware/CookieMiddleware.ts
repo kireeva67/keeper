@@ -1,19 +1,13 @@
 import type { Request, Response, NextFunction } from "express";
 import { prismaController } from "../prisma/PrismaController";
 import { log } from "node:console";
-import { LOGIN_ROUTE } from "../config/pages";
 
 export async function requireAuth(req: Request, res: Response, next: NextFunction) {
   try {
     const raw = req.cookies?.sid;
     log('Auth middleware - session id from cookie:', raw);
     if (!raw) {
-      if (req.path.startsWith('/api') || req.path.startsWith('/auth')) {
-        return res.status(401).json({ error: 'Unauthorized' });
-      } else {
-        res.redirect(`${process.env.CLIENT_URL}${LOGIN_ROUTE}`);
-        return;
-      }
+      return res.status(401).json({ error: 'Unauthorized' });
     };
 
     const session = await prismaController.findValidSession(raw);
