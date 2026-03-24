@@ -2,18 +2,19 @@ import { Button, Dialog, DialogActions, DialogContent, DialogContentText, Dialog
 
 type Props = {
     open: boolean;
-    categoryName: string;
+    title: string;
+    description: string;
     onConfirm: () => void;
     onCancel: () => void;
 }
 
-export default function ConfirmDeletionDialog({ open, categoryName, onConfirm, onCancel }: Props) {
+export default function ConfirmDeletionDialog({ open, title, description, onConfirm, onCancel }: Props) {
     return (
         <Dialog open={open} onClose={onCancel}>
-            <DialogTitle>Delete "{categoryName}"?</DialogTitle>
+            <DialogTitle>{title}</DialogTitle>
             <DialogContent>
                 <DialogContentText>
-                    Any products in this category will be reassigned to Other.
+                    {description}
                 </DialogContentText>
             </DialogContent>
             <DialogActions>

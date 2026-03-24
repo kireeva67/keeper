@@ -10,20 +10,20 @@ describe('ConfirmDeletionDialog', () => {
         vi.clearAllMocks();
     });
 
-    it('renders the dialog with the correct category name', () => {
-        render(<ConfirmDeletionDialog open={true} categoryName="Test Category" onConfirm={mockOnConfirm} onCancel={mockOnCancel} />);
-        expect(screen.getByText('Delete "Test Category"?')).toBeInTheDocument();
+    it('renders the dialog with the correct title and description', () => {
+        render(<ConfirmDeletionDialog open={true} title="Delete Test Category?" description="Any products in this category will be reassigned to Other." onConfirm={mockOnConfirm} onCancel={mockOnCancel} />);
+        expect(screen.getByText('Delete Test Category?')).toBeInTheDocument();
         expect(screen.getByText(/Any products in this category will be reassigned to Other./i)).toBeInTheDocument();
     });
 
     it('calls onConfirm when Delete button is clicked', async () => {
-        render(<ConfirmDeletionDialog open={true} categoryName="Test Category" onConfirm={mockOnConfirm} onCancel={mockOnCancel} />);
+        render(<ConfirmDeletionDialog open={true} title="Delete Test Category?" description="Any products in this category will be reassigned to Other." onConfirm={mockOnConfirm} onCancel={mockOnCancel} />);
         await userEvent.click(screen.getByRole('button', { name: /delete/i }));
         expect(mockOnConfirm).toHaveBeenCalled();
     });
 
     it('calls onCancel when Cancel button is clicked', async () => {
-        render(<ConfirmDeletionDialog open={true} categoryName="Test Category" onConfirm={mockOnConfirm} onCancel={mockOnCancel} />);
+        render(<ConfirmDeletionDialog open={true} title="Delete Test Category?" description="Any products in this category will be reassigned to Other." onConfirm={mockOnConfirm} onCancel={mockOnCancel} />);
         await userEvent.click(screen.getByRole('button', { name: /cancel/i }));
         expect(mockOnCancel).toHaveBeenCalled();
     });

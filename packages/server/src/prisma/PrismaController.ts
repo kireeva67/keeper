@@ -222,6 +222,12 @@ export class PrismaController {
             where: { email }
         });
     }
+
+    public async deleteUser(email: string) {
+        return await prisma.user.delete({
+            where: { email }
+        });
+    }
 }
 
 export const prismaController = new PrismaController();

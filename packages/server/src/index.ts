@@ -16,6 +16,7 @@ import { isSafeUrl } from './utils/isSafeUrl';
 import { hashPassword, validateNewPassword, getPasswordError } from './utils/password';
 import { addProductLimiter } from './middleware/ProductLimiter';
 import { getCookieDefaults } from './utils/getCookie';
+import { a } from 'vitest/dist/chunks/suite.d.udJtyAgw';
 
 dotenv.config();
 const app = express();
@@ -285,10 +286,27 @@ app.delete(`/api/categories/:id`, requireAuth, async (req, res) => {
 });
 
 app.get('/api/me', requireAuth, (req, res) => {
-    const user = (req as any).user as TTableUserData;
-    user.hasPassword = !!user.password;
-    log('Fetching current user info:', (req as any).user);
-    res.json((req as any).user);
+    try {
+        const user = (req as any).user as TTableUserData;
+        user.hasPassword = !!user.password;
+        log('Fetching current user info:', (req as any).user);
+        res.json((req as any).user);
+    } catch (error) {
+        console.error('Failed to fetch user info:', error);
+        res.status(500).json({ message: 'Failed to fetch user info.' });
+    }
+});
+
+app.delete('/api/me', requireAuth, async (req, res) => {
+    try {
+        const user = (req as any).user;
+        await prismaController.deleteUser(user.email);
+        res.clearCookie('sid');
+        res.json(true);
+    } catch (error) {
+        console.error('Failed to delete account:', error);
+        return res.status(500).json({ message: 'Failed to delete account.' });
+    }
 });
 
 app.put(`/api/me`, requireAuth, async (req, res) => {
