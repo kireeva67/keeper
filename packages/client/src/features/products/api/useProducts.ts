@@ -7,11 +7,13 @@ type ProductContextType = {
     loading: boolean;
     hasMore: boolean;
     total: number;
+    categoriesIds: number[];
     loadMore: () => void;
     updateProductInState: (product: Product) => void;
     deleteProductFromState: (id: number) => void;
     addProductToState: (product: Product) => void;
     reassignCategoryInState: (fromCategoryId: number, toCategory: Category) => void;
+    setFilter: (ids: number[]) => void;
 };
 
 export const ProductContext = createContext<ProductContextType | undefined>(undefined);

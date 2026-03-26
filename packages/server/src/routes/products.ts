@@ -3,7 +3,7 @@ import { Router } from "express";
 import { requireAuth } from "../middleware/CookieMiddleware";
 import { addProductLimiter } from "../middleware/ProductLimiter";
 import { prismaController } from "../prisma/PrismaController";
-import { TTableProductData } from "../types/TableTypes";
+import { TGetProductsQuery, TTableProductData } from "../types/Types";
 import { getMetadata } from "../utils/getMetadata";
 import { isSafeUrl } from "../utils/isSafeUrl";
 import { Prisma } from "../../generated/prisma";
@@ -13,13 +13,15 @@ export const productsRouter = Router();
 productsRouter.get(`/`, requireAuth, async (req, res) => {
     try {
         const user = (req as any).user;
+        const query = req.query as unknown as TGetProductsQuery;
         const limit = 10;
-        const cursor = req.query.cursor ? parseInt(req.query.cursor as string) : null;
+        const cursor = query.cursor ? parseInt(query.cursor as string) : null;
+        const categoryIds = query.categoryIds ? query.categoryIds.split(',').map(Number).filter(Boolean) : [];
         const [products, total] = await Promise.all([
-            prismaController.getProductsForUser(user.email, limit, cursor),
-            prismaController.countProductsForUser(user.email)
+            prismaController.getProductsForUser(user.email, limit, cursor, categoryIds),
+            prismaController.countProductsForUser(user.email, categoryIds)
         ]); const nextCursor = products.length === limit ? products[products.length - 1].id : null;
-        log('Fetched products for user:', products);
+        log('Fetched products for user:', products, categoryIds);
         res.json({ products, nextCursor, total });
     } catch (error) {
         console.error('Failed to fetch products:', error);

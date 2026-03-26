@@ -1,4 +1,4 @@
-import { AppBar, Avatar, Fab, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, Toolbar, Typography } from '@mui/material';
+import { AppBar, Fab, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, Toolbar, Typography } from '@mui/material';
 import AddIcon from "@mui/icons-material/Add";
 import { useLocation, useNavigate } from 'react-router-dom';
 import { PRODUCTS_NEW_ROUTE, SETTINGS_ROUTE } from '../../auth/config/authURLS';
@@ -10,6 +10,8 @@ import LogOutIcon from "@mui/icons-material/LogOut";
 import { useState } from 'react';
 import { useAuth } from '../../auth/api/useAuth';
 import { UserAvatar } from '../../../shared/components/UserAvatar';
+import { useCategories } from '../api/useCategories';
+import CategoryFilter from '../filter/CategoryFilter';
 
 export default function ProductsPage() {
     const { total } = useProducts();
@@ -20,6 +22,8 @@ export default function ProductsPage() {
     const menuOpen = Boolean(anchorEl);
     const openMenu = (e: React.MouseEvent<HTMLElement>) => setAnchorEl(e.currentTarget);
     const closeMenu = () => setAnchorEl(null);
+    const { categories } = useCategories();
+    const { setFilter, categoriesIds } = useProducts();
 
     return (
         <>
@@ -50,6 +54,13 @@ export default function ProductsPage() {
                             </MenuItem>
                         </Menu>
                     </>
+                </Toolbar>
+                <Toolbar sx={{ overflowX: 'auto', gap: 1, pb: 1, flexWrap: 'nowrap' }}>
+                    <CategoryFilter
+                        categories={categories}
+                        value={categoriesIds}
+                        onChange={(id) => setFilter(id)}
+                    />
                 </Toolbar>
             </AppBar>
 

@@ -1,7 +1,6 @@
 import { prisma } from './prisma'
 import { TokenUtil } from '../token/TokenUtil';
-import { TToken } from '../types/Token';
-import { TTableCategoryData, TTableProductData } from '../types/TableTypes';
+import { TTableCategoryData, TTableProductData, TToken } from '../types/Types';
 
 export class PrismaController {
 
@@ -68,12 +67,15 @@ export class PrismaController {
         });
     }
 
-    public async getProductsForUser(email: string, limit: number, cursor: number | null) {
+    public async getProductsForUser(email: string, limit: number, cursor: number | null, categoryIds: number[]) {
         return await prisma.product.findMany({
             where: {
                 user: {
                     email: email
-                }
+                },
+                ...(categoryIds.length > 0 && {
+                    categoryId: { in: categoryIds }
+                })
             },
             take: limit,
             ...(cursor && {
@@ -85,12 +87,15 @@ export class PrismaController {
         });
     }
 
-    public async countProductsForUser(email: string) {
+    public async countProductsForUser(email: string, categoryIds: number[]) {
         return await prisma.product.count({
             where: {
                 user: {
                     email: email
-                }
+                },
+                ...(categoryIds.length > 0 && {
+                    categoryId: { in: categoryIds }
+                })
             }
         });
     }
@@ -208,6 +213,12 @@ export class PrismaController {
                 where: { id, user: { email } },
             }),
         ]);
+    }
+
+    public async countCustomCategoriesForUser(email: string) {
+        return await prisma.category.count({
+            where: { user: { email } }
+        });
     }
 
     public async updatePassword(email: string, password: string) {

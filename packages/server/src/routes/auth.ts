@@ -1,9 +1,8 @@
 import passport from "passport";
 import { Router } from "express";
-import { TTableUserData } from "../types/TableTypes";
+import { TTableUserData, TToken } from "../types/Types";
 import { prismaController } from "../prisma/PrismaController";
 import { getCookieDefaults } from "../utils/getCookie";
-import { TToken } from "../types/Token";
 import { log } from "console";
 import { getPasswordError, hashPassword, validateNewPassword } from "../utils/password";
 import { requireAuth } from "../middleware/CookieMiddleware";

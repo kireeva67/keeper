@@ -2,7 +2,7 @@ import { log } from "console";
 import { Router } from "express";
 import { requireAuth } from "../middleware/CookieMiddleware";
 import { prismaController } from "../prisma/PrismaController";
-import { TTableUserData } from "../types/TableTypes";
+import { TTableUserData } from "../types/Types";
 import { getPasswordError, hashPassword, validateNewPassword } from "../utils/password";
 
 export const meRouter = Router();

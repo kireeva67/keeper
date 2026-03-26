@@ -2,7 +2,8 @@ import { log } from "console";
 import { Router } from "express";
 import { requireAuth } from "../middleware/CookieMiddleware";
 import { prismaController } from "../prisma/PrismaController";
-import { TTableCategoryData } from "../types/TableTypes";
+import { TTableCategoryData } from "../types/Types";
+import { addCategoryLimiter } from "../middleware/CategoriesLimiter";
 
 export const categoriesRouter = Router();
 
@@ -19,7 +20,7 @@ categoriesRouter.get(`/`, requireAuth, async (req, res) => {
     }
 });
 
-categoriesRouter.post(`/`, requireAuth, async (req, res) => {
+categoriesRouter.post(`/`, requireAuth, addCategoryLimiter, async (req, res) => {
     try {
         const user = (req as any).user;
         const body: TTableCategoryData = req.body;

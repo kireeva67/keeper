@@ -17,3 +17,14 @@ export type TTableCategoryData = {
     name: string;
     color: string;
 }
+
+export type TGetProductsQuery = {
+    cursor?: string;
+    categoryIds?: string;
+}
+
+export type TToken = {
+    token: string;
+    hashed: string;
+    validTo: Date;
+}
