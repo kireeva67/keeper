@@ -1,4 +1,4 @@
-import { AppBar, Fab, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, Toolbar, Typography } from '@mui/material';
+import { AppBar, Box, Fab, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, Toolbar, Typography } from '@mui/material';
 import AddIcon from "@mui/icons-material/Add";
 import { useLocation, useNavigate } from 'react-router-dom';
 import { PRODUCTS_NEW_ROUTE, SETTINGS_ROUTE } from '../../auth/config/authURLS';
@@ -64,7 +64,10 @@ export default function ProductsPage() {
                 </Toolbar>
             </AppBar>
 
-            <ProductList />
+            <Box>
+                <Toolbar />
+                <ProductList />
+            </Box>
 
             <Fab
                 color="primary"

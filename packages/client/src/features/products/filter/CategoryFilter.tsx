@@ -33,10 +33,13 @@ export default function CategoryFilter({ categories, value, onChange }: Category
                 sx={{
                     ...pillSx,
                     flexShrink: 0,
-                    '&:hover, &.Mui-selected, &.Mui-selected:hover': {
-                        bgcolor: 'action.selected',
-                        color: 'text.primary',
-                        border: '1px solid currentColor !important',
+                    '&:hover': {
+                        bgcolor: 'action.hover',
+                    },
+                    '&.Mui-selected, &.Mui-selected:hover': {
+                        bgcolor: 'primary.main',
+                        color: 'primary.contrastText',
+                        border: '1px solid transparent !important',
                     },
                 }}
             >

@@ -3,15 +3,17 @@ import type { Product } from '../../../shared/types/ProductType';
 import { ProductContext } from '../api/useProducts';
 import { type Category } from '../../../shared/types/CategoryType';
 import { getProducts } from '../api/getProducts';
+import { useSearchParams } from 'react-router-dom';
 
 export const ProductProvider = ({ children }: { children: React.ReactNode }) => {
     const [products, setProducts] = useState<Product[]>([]);
     const [cursor, setCursor] = useState<number | null>(null);
-    const [categoriesIds, setCategories] = useState<number[]>([]);
     const [hasMore, setHasMore] = useState(true);
     const [loading, setLoading] = useState(false);
     const [total, setTotal] = useState(0);
     const loadingRef = useRef(false);
+    const [searchParams, setSearchParams] = useSearchParams();
+    const categoriesIds = searchParams.getAll('category').map(Number);
 
     const loadMore = useCallback(async () => {
         if (loadingRef.current || !hasMore) return;
@@ -19,7 +21,7 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
     }, [cursor, hasMore, categoriesIds]);
 
     useEffect(() => {
-        loadMore();
+        fetchProducts(categoriesIds, null, false);
     }, []);
 
     const reload = useCallback(async (ids: number[]) => {
@@ -45,8 +47,7 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
     }
 
     const setFilter = (ids: number[]) => {
-        //TODO set url params
-        setCategories(ids);
+        setSearchParams(ids.length ? { category: ids.map(String) } : {});
         reload(ids);
     };
 
@@ -60,8 +61,10 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
     };
 
     const addProductToState = (newProduct: Product) => {
-        setProducts(prev => [newProduct, ...prev]);
-        setTotal(prev => prev + 1);
+        if (categoriesIds.includes(newProduct.category.id)) {
+            setProducts(prev => [newProduct, ...prev]);
+            setTotal(prev => prev + 1);
+        }
     };
 
     const reassignCategoryInState = (fromCategoryId: number, toCategory: Category) => {
