@@ -13,7 +13,9 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
     const [total, setTotal] = useState(0);
     const loadingRef = useRef(false);
     const [searchParams, setSearchParams] = useSearchParams();
-    const categoriesIds = searchParams.getAll('category').map(Number);
+    const [categoriesIds, setCategoriesIds] = useState<number[]>(() =>
+        searchParams.getAll('category').map(Number)
+    );
 
     const loadMore = useCallback(async () => {
         if (loadingRef.current || !hasMore) return;
@@ -48,24 +50,31 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
 
     const setFilter = (ids: number[]) => {
         setSearchParams(ids.length ? { category: ids.map(String) } : {});
+        setCategoriesIds(ids);
         reload(ids);
     };
 
-    const updateProductInState = (updated: Product) => {
-        setProducts(prev => prev.map(p => p.id === updated.id ? updated : p));
-    };
+    const updateProductInState = useCallback((updated: Product) => {
+        if (categoriesIds.length === 0 || categoriesIds.includes(updated.category.id)) {
+            setProducts(prev => prev.map(p => p.id === updated.id ? updated : p));
+        } else {
+            setProducts(prev => prev.filter(p => p.id !== updated.id));
+            setTotal(prev => prev - 1);
+        }
+    }, [categoriesIds]);
+
 
     const deleteProductFromState = (id: number) => {
         setProducts(prev => prev.filter(p => p.id !== id));
         setTotal(prev => prev - 1);
     };
 
-    const addProductToState = (newProduct: Product) => {
+    const addProductToState = useCallback((newProduct: Product) => {
         if (categoriesIds.length === 0 || categoriesIds.includes(newProduct.category.id)) {
             setProducts(prev => [newProduct, ...prev]);
             setTotal(prev => prev + 1);
         }
-    };
+    }, [categoriesIds]);
 
     const reassignCategoryInState = (fromCategoryId: number, toCategory: Category) => {
         setProducts(prev => prev.map(p =>
