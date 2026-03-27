@@ -55,7 +55,7 @@ export default function ProductsPage() {
                         </Menu>
                     </>
                 </Toolbar>
-                <Toolbar sx={{ overflowX: 'auto', gap: 1, pb: 1, flexWrap: 'nowrap' }}>
+                <Toolbar sx={{ pb: 1, justifyContent: 'center' }}>
                     <CategoryFilter
                         categories={categories}
                         value={categoriesIds}

@@ -24,7 +24,7 @@ const pillSx = {
 export default function CategoryFilter({ categories, value, onChange }: CategoryFilterProps) {
     const isAll = value.length === 0;
     return (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%', overflow: 'hidden' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, maxWidth: 1200, width: '100%', overflow: 'hidden' }}>
             <ToggleButton
                 value="all"
                 selected={isAll}
