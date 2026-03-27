@@ -3,7 +3,7 @@ import type { LocationState } from "../../shared/types/LocationType";
 import { useAuth } from "../../features/auth/api/useAuth";
 import { useEffect } from "react";
 import { setOnUnauthorized } from "../../shared/api/http";
-import { LOGIN_ROUTE, PRODUCT_EDIT_ROUTE, PRODUCTS_NEW_ROUTE, PRODUCTS_ROUTE, SETTINGS_ROUTE, SIGN_UP_ROUTE } from "../../features/auth/config/authURLS";
+import { FORGOT_PASSWORD_ROUTE, LOGIN_ROUTE, PRODUCT_EDIT_ROUTE, PRODUCTS_NEW_ROUTE, PRODUCTS_ROUTE, RESET_PASSWORD_ROUTE, SETTINGS_ROUTE, SIGN_UP_ROUTE } from "../../features/auth/config/authURLS";
 import CenteredLayout from "../../shared/components/CenteredLayout";
 import SignUpPage from "../../features/auth/pages/SignUpPage";
 import LoginPage from "../../features/auth/pages/LoginPage";
@@ -13,6 +13,8 @@ import { ScrollContentLayout } from "../../shared/components/ScrollableContentLa
 import EditProductDialog from "../../features/products/dialog/EditProductDialog";
 import SettingsPage from "../../features/settings/pages/SettingsPage";
 import { ProductProvider } from "../../features/products/context/ProductContext";
+import ForgotPasswordPage from "../../features/auth/pages/ForgotPasswordPage";
+import ResetPasswordPage from "../../features/auth/pages/ResetPasswordPage";
 
 export function UnauthorizedBridge() {
     const navigate = useNavigate();
@@ -46,6 +48,8 @@ export function AppRoutes() {
                 <Route element={<CenteredLayout />}>
                     <Route path={LOGIN_ROUTE} element={<LoginPage />} />
                     <Route path={SIGN_UP_ROUTE} element={<SignUpPage />} />
+                    <Route path={FORGOT_PASSWORD_ROUTE} element={<ForgotPasswordPage />} />
+                    <Route path={RESET_PASSWORD_ROUTE} element={<ResetPasswordPage />} />
                 </Route>
                 <Route path="*" element={<Navigate to={LOGIN_ROUTE} replace />} />
             </Routes>
@@ -63,6 +67,8 @@ export function AppRoutes() {
                         <Route path={PRODUCTS_NEW_ROUTE} element={<NewProductDialog fullPage />} />
                         <Route path={PRODUCT_EDIT_ROUTE} element={<EditProductDialog />} />
                         <Route path={SETTINGS_ROUTE} element={<SettingsPage />} />
+                        <Route path={FORGOT_PASSWORD_ROUTE} element={<ForgotPasswordPage />} />
+                        <Route path={RESET_PASSWORD_ROUTE} element={<ResetPasswordPage />} />
                     </Route>
                     <Route path="*" element={<Navigate to={PRODUCTS_ROUTE} replace />} />
                 </Routes>

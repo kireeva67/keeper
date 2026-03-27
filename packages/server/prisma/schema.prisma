@@ -2,23 +2,25 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-    provider = "prisma-client-js"
-   output   = "../generated/prisma"
+   provider = "prisma-client-js"
+   output = "../generated/prisma"
 }
 
 datasource db {
-  provider = "sqlite"
+   provider = "sqlite"
 }
 
 model User {
- id Int @id @default(autoincrement())
- email String @unique
- password String
- sessions Session[]
- products Product[]
- categories Category[]
- createdAt DateTime  @default(now())
- updatedAt DateTime  @updatedAt
+   id Int @id @default(autoincrement())
+   email String @unique
+   password String
+   sessions Session[]
+   products Product[]
+   categories Category[]
+   createdAt DateTime  @default(now())
+   updatedAt DateTime  @updatedAt
+   passwordResetToken  String?
+   passwordResetExpiry DateTime?
 }
 
 model Session {

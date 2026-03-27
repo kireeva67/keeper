@@ -1,6 +1,7 @@
 import { prisma } from './prisma'
 import { TokenUtil } from '../token/TokenUtil';
 import { TTableCategoryData, TTableProductData, TToken } from '../types/Types';
+import { PasswordResetTokenUtil } from '../token/PasswordResetTokenUtil';
 
 export class PrismaController {
 
@@ -54,6 +55,32 @@ export class PrismaController {
         } catch (error) {
             throw new Error("Could not create session. User may not exist.");
         }
+    }
+
+    public async createResetPasswordToken(email: string): Promise<TToken> {
+        const token = PasswordResetTokenUtil.createToken();
+        try {
+            await prisma.user.update({
+                where: { email },
+                data: {
+                    passwordResetToken: token.hashed,
+                    passwordResetExpiry: token.validTo
+                }
+            });
+            return token;
+        } catch {
+            throw new Error("Could not create reset token.");
+        }
+    }
+
+    public async isValidPasswordReset(rawToken: string) {
+        const hashed = TokenUtil.hashIdSha256Base64Url(rawToken);
+        return prisma.user.findFirst({
+            where: {
+                passwordResetToken: hashed,
+                passwordResetExpiry: { gt: new Date() },
+            },
+        });
     }
 
     public async findValidSession(rawToken: string) {
@@ -237,6 +264,18 @@ export class PrismaController {
     public async deleteUser(email: string) {
         return await prisma.user.delete({
             where: { email }
+        });
+    }
+
+    public async clearResetToken(email: string) {
+        return await prisma.user.update({
+            where: {
+                email
+            },
+            data: {
+                passwordResetToken: null,
+                passwordResetExpiry: null,
+            }
         });
     }
 }

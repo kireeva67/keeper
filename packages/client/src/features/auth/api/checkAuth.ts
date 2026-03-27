@@ -1,9 +1,9 @@
-import { http } from "../../../shared/api/http";
+import { API_URL } from "../../../shared/api/http";
 
 export async function checkAuth(): Promise<boolean> {
     try {
-        await http("/api/healthCheck");
-        return true;
+        const res = await fetch(`${API_URL}/api/healthCheck`, { credentials: "include" });
+        return res.ok;
     } catch {
         return false;
     }

@@ -7,6 +7,8 @@ import { useNavigate } from "react-router-dom";
 import { PRODUCTS_ROUTE } from "../config/authURLS";
 import { useAuth } from "../api/useAuth";
 import { PasswordTextField } from "../../../shared/components/PasswordTextField";
+import { ForgotPasswordButton } from "../../../shared/components/ForgotPasswordButton";
+import { FROM_STATE } from "../../../shared/types/FromStateType";
 
 export default function LoginPage() {
     const navigate = useNavigate();
@@ -45,6 +47,8 @@ export default function LoginPage() {
                     value={password} onChange={e => { setPassword(e.target.value); setErrors({}); }}
                     error={!!errors.new} helperText={errors.new}
                 />
+
+                <ForgotPasswordButton from={FROM_STATE.LOGIN} />
 
                 <Button variant="contained" onClick={() => onSubmit()}>
                     Login

@@ -4,6 +4,8 @@ import { useUser } from "../../../shared/api/useUser";
 import { UserAvatar } from "../../../shared/components/UserAvatar";
 import { validatePassword } from "../../../shared/utils/validatePassword";
 import { PasswordTextField } from "../../../shared/components/PasswordTextField";
+import { ForgotPasswordButton } from "../../../shared/components/ForgotPasswordButton";
+import { FROM_STATE } from "../../../shared/types/FromStateType";
 
 export function ProfileSection() {
     const { email, hasPassword, updatePassword } = useUser();
@@ -54,6 +56,7 @@ export function ProfileSection() {
                     value={newPassword} onChange={e => setNewPassword(e.target.value)}
                     error={!!errors.new} helperText={errors.new}
                 />
+                {hasPassword && <Box sx={{ alignSelf: 'flex-start' }}><ForgotPasswordButton from={FROM_STATE.SETTINGS} /></Box>}
                 <Box sx={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 2 }}>
                     {success && (
                         <Typography

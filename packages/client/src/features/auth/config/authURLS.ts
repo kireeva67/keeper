@@ -5,3 +5,5 @@ export const PRODUCTS_ROUTE = `/products`;
 export const PRODUCTS_NEW_ROUTE = `/products/new`;
 export const PRODUCT_EDIT_ROUTE = `/products/edit/:id`;
 export const SETTINGS_ROUTE = `/settings`;
+export const FORGOT_PASSWORD_ROUTE = `/forgot-password`;
+export const RESET_PASSWORD_ROUTE = `/reset-password`;

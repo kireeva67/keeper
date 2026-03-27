@@ -6,6 +6,9 @@ import { getCookieDefaults } from "../utils/getCookie";
 import { log } from "console";
 import { getPasswordError, hashPassword, validateNewPassword } from "../utils/password";
 import { requireAuth } from "../middleware/CookieMiddleware";
+import { Resend } from "resend";
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export const authRouter = Router();
 
@@ -76,5 +79,54 @@ authRouter.delete('/session', requireAuth, async (req, res) => {
     } catch (error) {
         console.error('Failed to logout:', error);
         return res.status(500).json({ message: 'Failed to logout.' });
+    }
+});
+
+authRouter.post('/forgot-password', async (req, res) => {
+    const GENERIC_RESPONSE = { message: 'If this email is registered, you will receive a reset link.' };
+    try {
+        const { email } = req.body;
+        const user = await prismaController.findUser(email);
+        if (!user) {
+            return res.status(200).json(GENERIC_RESPONSE);
+        }
+        const token = await prismaController.createResetPasswordToken(email);
+        const resetLink = `${process.env.CLIENT_URL}/reset-password?token=${token.token}`;
+        const { error } = await resend.emails.send({
+            from: 'onboarding@resend.dev',
+            to: email,
+            subject: 'Reset your password',
+            html: `<p>Click <a href="${resetLink}">here</a> to reset your password. The link expires in 1 hour.</p>`,
+        });
+        if (error) {
+            console.error('Failed to send reset email:', error);
+            await prismaController.clearResetToken(email);
+            return res.status(500).json({ message: 'Failed to send reset email.' });
+        }
+        return res.status(200).json(GENERIC_RESPONSE);
+    } catch (error) {
+        console.error('Failed to reset password:', error);
+        return res.status(500).json({ message: 'Failed to reset password.' });
+    }
+});
+
+authRouter.post('/reset-password', async (req, res) => {
+    try {
+        const { token, password } = req.body;
+        const user = await prismaController.isValidPasswordReset(token);
+        if (!user) {
+            return res.status(400).json({ message: 'Reset password time was expired.' });
+        }
+        const passwordError = validateNewPassword(password);
+        if (passwordError) {
+            return res.status(400).json({ message: passwordError });
+        }
+        const hash = await hashPassword(password);
+        await prismaController.updatePassword(user.email, hash);
+        await prismaController.clearResetToken(user.email);
+        return res.status(200).json(true);
+    } catch (error) {
+        console.error('Failed to reset password:', error);
+        return res.status(500).json({ message: 'Failed to reset password.' });
     }
 });
