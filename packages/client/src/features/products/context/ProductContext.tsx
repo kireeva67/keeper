@@ -61,7 +61,7 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
     };
 
     const addProductToState = (newProduct: Product) => {
-        if (categoriesIds.includes(newProduct.category.id)) {
+        if (categoriesIds.length === 0 || categoriesIds.includes(newProduct.category.id)) {
             setProducts(prev => [newProduct, ...prev]);
             setTotal(prev => prev + 1);
         }
