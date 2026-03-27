@@ -20,6 +20,11 @@ vi.mock('../middleware/CookieMiddleware', () => ({
     })
 }));
 
+vi.mock('../middleware/CategoriesLimiter', () => ({
+    addCategoryLimiter: vi.fn((_req: any, _res: any, next: () => void) => next()),
+}));
+
+
 describe('POST /api/categories', () => {
     beforeEach(() => {
         vi.clearAllMocks();
