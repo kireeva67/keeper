@@ -18,3 +18,12 @@ pnpm-debug.log*
 
 # OS junk
 .DS_Store
+
+# SQLite database
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# Prisma generated client
+**/generated/
