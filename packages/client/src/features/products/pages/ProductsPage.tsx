@@ -6,7 +6,7 @@ import { ProductList } from '../list/ProductsList';
 import { useProducts } from '../api/useProducts';
 
 import SettingsIcon from "@mui/icons-material/Settings";
-import LogOutIcon from "@mui/icons-material/LogOut";
+import LogOutIcon from "@mui/icons-material/Logout";
 import { useState } from 'react';
 import { useAuth } from '../../auth/api/useAuth';
 import { UserAvatar } from '../../../shared/components/UserAvatar';
