@@ -11,12 +11,7 @@
     },
     "devDependencies": {
         "@types/bcrypt": "^6.0.0",
-        "@types/cookie-parser": "^1.4.10",
         "@types/cors": "^2.8.19",
         "concurrently": "^9.2.1"
-    },
-    "dependencies": {
-        "cookie-parser": "^1.4.7",
-        "uuid": "^13.0.0"
     }
 }

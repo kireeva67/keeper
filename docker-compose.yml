@@ -1,0 +1,29 @@
+services:
+  server:
+    build: ./packages/server
+    image: ${DOCKER_USERNAME}/keeper-server:latest
+    restart: unless-stopped
+    env_file:
+      - ./packages/server/.env
+    environment:
+      - CLIENT_URL=${CLIENT_URL}
+      - API_URL=${API_URL}
+    volumes:
+      - db-data:/app/data
+    expose:
+      - "3000"
+
+  client:
+    build:
+      context: ./packages/client
+      args:
+        VITE_API_URL: ${VITE_API_URL}
+    image: ${DOCKER_USERNAME}/keeper-client:latest
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - server
+
+volumes:
+  db-data:
