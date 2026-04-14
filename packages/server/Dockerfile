@@ -14,4 +14,4 @@ RUN npx prisma generate
 
 EXPOSE 3000
 
-CMD ["tsx", "src/index.ts"]
+CMD ["node_modules/.bin/tsx", "src/index.ts"]
