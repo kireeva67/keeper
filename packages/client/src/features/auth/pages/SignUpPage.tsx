@@ -1,4 +1,4 @@
-import { Container, Button, TextField, Stack } from "@mui/material";
+import { Box, Button, Divider, TextField, Stack, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { LOGIN_ROUTE, PRODUCTS_ROUTE } from "../config/authURLS";
 import { useState } from "react";
@@ -6,6 +6,8 @@ import { PasswordTextField } from "../../../shared/components/PasswordTextField"
 import { addUser } from "../api/addUser";
 import { validatePassword } from "../../../shared/utils/validatePassword";
 import { useAuth } from "../api/useAuth";
+import { GoogleSSOButton } from "../components/GoogleSSOButton";
+import { KeeperLogo } from "../../../shared/components/KeeperLogo";
 
 export default function SignUpPage() {
     const navigate = useNavigate();
@@ -37,8 +39,19 @@ export default function SignUpPage() {
     };
 
     return (
-        <Container maxWidth="sm" sx={{ mt: 8 }}>
+        <>
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 3 }}>
+                <KeeperLogo width={92} height={92} />
+                <Typography variant="caption" color="text.secondary" sx={{ mt: 1 }}>
+                    your personal keeper
+                </Typography>
+            </Box>
+
             <Stack spacing={2}>
+                <GoogleSSOButton />
+
+                <Divider>or</Divider>
+
                 <TextField label="Email" size="small" type="email" fullWidth
                     value={email} onChange={e => { setEmail(e.target.value); setErrors(prev => ({ ...prev, email: undefined })); }}
                     error={!!errors.email} helperText={errors.email}
@@ -56,6 +69,6 @@ export default function SignUpPage() {
                     Already have an account? Sign in
                 </Button>
             </Stack>
-        </Container>
+        </>
     );
 }

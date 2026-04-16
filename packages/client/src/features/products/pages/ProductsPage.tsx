@@ -38,14 +38,17 @@ export default function ProductsPage() {
                     <IconButton onClick={openMenu}>
                         <MoreVertIcon />
                     </IconButton>
-                    <Menu anchorEl={anchorEl} open={menuOpen} onClose={closeMenu}>
+                    <Menu anchorEl={anchorEl} open={menuOpen} onClose={closeMenu}
+                        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+                    >
                         <MenuItem onClick={() => navigate(SETTINGS_ROUTE)}>
                             <ListItemIcon><SettingsIcon fontSize="small" /></ListItemIcon>
                             <ListItemText>Settings</ListItemText>
                         </MenuItem>
-                        <MenuItem onClick={logout}>
-                            <ListItemIcon><LogOutIcon fontSize="small" /></ListItemIcon>
-                            <ListItemText>Logout</ListItemText>
+                        <MenuItem onClick={logout} sx={{ color: 'error.main' }}>
+                            <ListItemIcon><LogOutIcon fontSize="small" sx={{ color: 'error.main' }} /></ListItemIcon>
+                            <ListItemText>Log out</ListItemText>
                         </MenuItem>
                     </Menu>
                 </Toolbar>

@@ -1,5 +1,6 @@
 
 import { Box, ToggleButton, ToggleButtonGroup } from "@mui/material";
+import { alpha } from "@mui/material/styles";
 import type { Category } from "../../../shared/types/CategoryType";
 import { categoryChipSx } from "../categories/categoryChipSx";
 
@@ -40,9 +41,10 @@ export default function CategoryFilter({ categories, value, onChange, count }: C
                         bgcolor: 'action.hover',
                     },
                     '&.Mui-selected, &.Mui-selected:hover': {
-                        bgcolor: 'primary.main',
-                        color: 'primary.contrastText',
-                        border: '1px solid transparent !important',
+                        bgcolor: (t) => alpha(t.palette.primary.main, 0.3),
+                        color: 'primary.main',
+                        border: (t) => `1px solid ${alpha(t.palette.primary.main, 0.3)} !important`,
+                        fontWeight: 600,
                     },
                 }}
             >

@@ -59,13 +59,16 @@ export function ProductCard({ product }: CardProps) {
                 <IconButton aria-label="more options" onClick={openMenu} size="small" sx={{ flexShrink: 0 }}>
                     <MoreVertIcon fontSize="small" />
                 </IconButton>
-                <Menu anchorEl={anchorEl} open={menuOpen} onClose={closeMenu}>
+                <Menu anchorEl={anchorEl} open={menuOpen} onClose={closeMenu}
+                    anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                    transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+                >
                     <MenuItem onClick={handleEdit}>
                         <ListItemIcon><EditIcon fontSize="small" /></ListItemIcon>
                         <ListItemText>Edit</ListItemText>
                     </MenuItem>
-                    <MenuItem onClick={handleDelete}>
-                        <ListItemIcon><DeleteIcon fontSize="small" /></ListItemIcon>
+                    <MenuItem onClick={handleDelete} sx={{ color: 'error.main' }}>
+                        <ListItemIcon><DeleteIcon fontSize="small" sx={{ color: 'error.main' }} /></ListItemIcon>
                         <ListItemText>Delete</ListItemText>
                     </MenuItem>
                 </Menu>

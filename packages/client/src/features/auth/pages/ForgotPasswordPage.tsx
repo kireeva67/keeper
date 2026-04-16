@@ -10,7 +10,7 @@ export default function ForgotPasswordPage() {
     const navigate = useNavigate();
     const location = useLocation();
     const from = location.state?.from === 'settings' ? SETTINGS_ROUTE : LOGIN_ROUTE;
-    const label = location.state?.from === 'settings' ? 'Back to settings' : 'Back to login';
+    const label = location.state?.from === 'settings' ? 'Back to settings' : 'Back to sign in';
     const [success, setSuccess] = useState(false);
     const [submitting, setSubmitting] = useState(false);
 
@@ -29,7 +29,10 @@ export default function ForgotPasswordPage() {
     return (
         <Container maxWidth="sm" sx={{ mt: 8 }}>
             <Typography variant="h6" gutterBottom>
-                Forgot Password
+                Forgot password
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                We'll send a reset link to your email.
             </Typography>
 
             <Stack spacing={2}>
