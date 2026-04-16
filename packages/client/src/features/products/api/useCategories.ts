@@ -18,8 +18,8 @@ export function useCategories() {
             try {
                 const categories = await getCategoriesForUser();
                 setCategories(categories);
-            } catch (error) {
-                console.error("Failed to fetch categories:", error);
+            } catch {
+                // 401 handled globally via onUnauthorized redirect
             }
         };
         fetchCategories();

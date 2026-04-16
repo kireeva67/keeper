@@ -37,13 +37,13 @@ export function ProfileSection() {
     };
 
     return (
-        <Box>
-            <Typography variant="overline" color="text.secondary">Profile</Typography>
+        <Box sx={{ width: '100%' }}>
+            <Typography variant="overline" color="text.secondary" sx={{ mb: 1.5, display: 'block' }}>Profile</Typography>
             <Box sx={{ display: "flex", alignItems: "center", gap: 2, mt: 1, mb: 2 }}>
                 <UserAvatar />
                 <Typography color="text.secondary">{email}</Typography>
             </Box>
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, width: '100%' }}>
                 {hasPassword && (
                     <PasswordTextField
                         label="Current password" size="small" fullWidth
@@ -57,20 +57,18 @@ export function ProfileSection() {
                     error={!!errors.new} helperText={errors.new}
                 />
                 {hasPassword && <Box sx={{ alignSelf: 'flex-start' }}><ForgotPasswordButton from={FROM_STATE.SETTINGS} /></Box>}
-                <Box sx={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 2 }}>
-                    {success && (
-                        <Typography
-                            variant="body2"
-                            color="success.main"
-                            sx={{ bgcolor: "rgba(46, 125, 50, 0.1)", px: 1.5, py: 0.5, borderRadius: 1 }}
-                        >
-                            Password updated successfully
-                        </Typography>
-                    )}
-                    <Button variant="contained" onClick={onSubmit}>
-                        {hasPassword ? "Update password" : "Set password"}
-                    </Button>
-                </Box>
+                {success && (
+                    <Typography
+                        variant="body2"
+                        color="success.main"
+                        sx={{ bgcolor: "rgba(46, 125, 50, 0.1)", px: 1.5, py: 0.5, borderRadius: 1, textAlign: 'center' }}
+                    >
+                        Password updated successfully
+                    </Typography>
+                )}
+                <Button variant="contained" fullWidth onClick={onSubmit}>
+                    {hasPassword ? "Update password" : "Set password"}
+                </Button>
             </Box>
         </Box>
     );

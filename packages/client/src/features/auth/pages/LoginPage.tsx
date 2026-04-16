@@ -1,4 +1,4 @@
-import { Container, Typography, Button, TextField, Stack, Divider } from "@mui/material";
+import { Container, Typography, Button, TextField, Stack, Divider, Box } from "@mui/material";
 import { GoogleSSOButton } from "../components/GoogleSSOButton";
 import { SignUpButton } from "../components/SignUpButton";
 import { useState } from "react";
@@ -9,6 +9,7 @@ import { useAuth } from "../api/useAuth";
 import { PasswordTextField } from "../../../shared/components/PasswordTextField";
 import { ForgotPasswordButton } from "../../../shared/components/ForgotPasswordButton";
 import { FROM_STATE } from "../../../shared/types/FromStateType";
+import { KeeperLogo } from "../../../shared/components/KeeperLogo";
 
 export default function LoginPage() {
     const navigate = useNavigate();
@@ -28,10 +29,13 @@ export default function LoginPage() {
     };
 
     return (
-        <Container maxWidth="sm" sx={{ mt: 8 }}>
-            <Typography variant="h4" gutterBottom>
-                Sign in
-            </Typography>
+        <>
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 3 }}>
+                <KeeperLogo width={92} height={92} />
+                <Typography variant="caption" color="text.secondary" sx={{ mt: 1 }}>
+                    your personal keeper
+                </Typography>
+            </Box>
 
             <Stack spacing={2}>
                 <GoogleSSOButton />
@@ -51,11 +55,11 @@ export default function LoginPage() {
                 <ForgotPasswordButton from={FROM_STATE.LOGIN} />
 
                 <Button variant="contained" onClick={() => onSubmit()}>
-                    Login
+                    Sign in
                 </Button>
 
                 <SignUpButton />
             </Stack>
-        </Container>
+        </>
     );
 }

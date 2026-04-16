@@ -4,6 +4,7 @@ export type Category = {
     name: string;
     color: string;
     userId?: number;
+    _count?: { products: number };
 };
 
 export enum CategoryName {

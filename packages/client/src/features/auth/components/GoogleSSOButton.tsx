@@ -8,6 +8,7 @@ export function GoogleSSOButton() {
             variant="outlined"
             startIcon={<GoogleIcon />}
             onClick={() => { window.location.href = GOOGLE_SSO_URL; }}
+            sx={{ border: '1px solid', borderColor: 'divider', color: 'text.primary', '&:hover': { borderColor: 'text.secondary' } }}
         >
             Sign in with Google
         </Button>

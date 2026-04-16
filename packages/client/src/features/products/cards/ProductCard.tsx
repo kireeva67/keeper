@@ -1,7 +1,6 @@
 import * as React from "react";
 import {
     Card,
-    CardHeader,
     CardMedia,
     IconButton,
     Menu,
@@ -9,8 +8,9 @@ import {
     ListItemIcon,
     ListItemText,
     CardActionArea,
-    CardContent,
-    Typography
+    Typography,
+    Chip,
+    Box,
 } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import EditIcon from "@mui/icons-material/Edit";
@@ -20,7 +20,6 @@ import type { Product } from "../../../shared/types/ProductType";
 import { DEFAULT_PRODUCT_IMAGE } from "./DefaultImage";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useProducts } from "../api/useProducts";
-import { Chip } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { useState } from "react";
 
@@ -52,52 +51,55 @@ export function ProductCard({ product }: CardProps) {
     };
 
     return (
-        <Card sx={{ borderRadius: 2 }}>
-            <CardHeader
-                title={title}
-                action={
-                    <>
-                        <IconButton aria-label="more options" onClick={openMenu}>
-                            <MoreVertIcon />
-                        </IconButton>
+        <Card sx={{ width: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column', boxShadow: '0 2px 12px rgba(0,0,0,0.07)' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', px: 2, pt: 2, pb: 1, gap: 1 }}>
+                <Typography variant="subtitle1" fontWeight={600} noWrap sx={{ flex: 1 }}>
+                    {title}
+                </Typography>
+                <IconButton aria-label="more options" onClick={openMenu} size="small" sx={{ flexShrink: 0 }}>
+                    <MoreVertIcon fontSize="small" />
+                </IconButton>
+                <Menu anchorEl={anchorEl} open={menuOpen} onClose={closeMenu}>
+                    <MenuItem onClick={handleEdit}>
+                        <ListItemIcon><EditIcon fontSize="small" /></ListItemIcon>
+                        <ListItemText>Edit</ListItemText>
+                    </MenuItem>
+                    <MenuItem onClick={handleDelete}>
+                        <ListItemIcon><DeleteIcon fontSize="small" /></ListItemIcon>
+                        <ListItemText>Delete</ListItemText>
+                    </MenuItem>
+                </Menu>
+            </Box>
 
-                        <Menu anchorEl={anchorEl} open={menuOpen} onClose={closeMenu}>
-                            <MenuItem onClick={handleEdit}>
-                                <ListItemIcon>
-                                    <EditIcon fontSize="small" />
-                                </ListItemIcon>
-                                <ListItemText>Edit</ListItemText>
-                            </MenuItem>
-
-                            <MenuItem onClick={handleDelete}>
-                                <ListItemIcon>
-                                    <DeleteIcon fontSize="small" />
-                                </ListItemIcon>
-                                <ListItemText>Delete</ListItemText>
-                            </MenuItem>
-                        </Menu>
-                    </>
-                }
-            />
-
-            <CardActionArea component="a"
-                href={url}
-                target="_blank"
-                rel="noopener noreferrer"
-            >
-                <CardMedia component="img" height="400" image={imageUrl ?? DEFAULT_PRODUCT_IMAGE} alt={title} loading="lazy" />
-
+            <CardActionArea component="a" href={url} target="_blank" rel="noopener noreferrer">
+                <CardMedia
+                    component="img"
+                    image={imageUrl ?? DEFAULT_PRODUCT_IMAGE}
+                    alt={title}
+                    loading="lazy"
+                    sx={{ width: '100%', aspectRatio: '16/9', objectFit: 'cover' }}
+                />
             </CardActionArea>
-            <CardContent>
+
+            <Box sx={{ px: 2, pt: 1, pb: 2, display: 'flex', flexDirection: 'column' }}>
                 <Chip
                     label={category.name.toLowerCase()}
                     size="small"
-                    sx={{ bgcolor: alpha(category.color, 0.25), color: category.color, border: `1px solid ${category.color}` }}
+                    sx={{
+                        backgroundColor: alpha(category.color, 0.12),
+                        color: category.color,
+                        fontWeight: 500,
+                        border: `1px solid ${category.color}22`,
+                        borderRadius: '20px',
+                        width: 'fit-content',
+                    }}
                 />
-                <Typography variant="body2" color="text.secondary">
-                    {description}
-                </Typography>
-            </CardContent>
+                {description && (
+                    <Typography sx={{ pl: 0.5, mt: '4px' }} variant="body2" color="text.secondary">
+                        {description}
+                    </Typography>
+                )}
+            </Box>
         </Card>
     );
 }

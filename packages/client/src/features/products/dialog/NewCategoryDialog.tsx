@@ -4,9 +4,18 @@ import type { Category } from "../../../shared/types/CategoryType";
 import { addCategory } from "../api/addCategory";
 
 const PRESET_COLORS = [
-    '#1976d2', '#e53935', '#7b1fa2', '#ec8bde',
-    '#ffa952', '#00897b', '#5c6bc0', '#f4e61e',
-    '#43a047', '#3949ab', '#00838f', '#9e9e9e',
+    '#c62828',
+    '#ad1457',
+    '#6a1b9a',
+    '#1565c0',
+    '#00695c',
+    '#2e7d32',
+    '#e65100',
+    '#f57f17',
+    '#4e342e',
+    '#0277bd',
+    '#558b2f',
+    '#37474f',
 ];
 
 type Props = {

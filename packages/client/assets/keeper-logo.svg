@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- bookmark -->
+  <path d="M14 8 L50 8 L50 56 L32 44 L14 56 Z" fill="#5e2d91"/>
+
+  <!-- shine -->
+  <ellipse cx="24" cy="20" rx="8" ry="5" fill="white" opacity="0.12"/>
+
+  <!-- star -->
+  <polygon points="32,22 35,31 45,31 37,37 40,46 32,40 24,46 27,37 19,31 29,31" fill="#f9c74f"/>
+
+  <!-- sparkles -->
+  <circle cx="8" cy="14" r="3" fill="#f9c74f" opacity="0.6"/>
+  <circle cx="5" cy="24" r="1.8" fill="#f9c74f" opacity="0.4"/>
+  <circle cx="56" cy="12" r="3" fill="#f9c74f" opacity="0.6"/>
+  <circle cx="59" cy="22" r="1.8" fill="#f9c74f" opacity="0.4"/>
+</svg>

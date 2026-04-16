@@ -48,19 +48,21 @@ export default function SettingsPage() {
                 <Typography variant="h6">Settings</Typography>
             </Box>
             <ProfileSection />
-            {customCategories.length > 0 && (
-                <Box>
-                    <Typography variant="overline" color="text.secondary">My categories</Typography>
-                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 2 }}>
-                        {customCategories.map(cat => (
-                            <CategoryTag key={cat.id} cat={cat} onDelete={() => setPendingDeleteId(cat.id)} />
-                        ))}
-                    </Box>
-                </Box>
-            )}
-
             <Divider />
-            <Button onClick={() => setPendingAccount(true)} variant="outlined" color="error" startIcon={<PersonRemove />}>
+            {customCategories.length > 0 && (
+                <>
+                    <Box>
+                        <Typography variant="overline" color="text.secondary" sx={{ mb: 1.5, display: 'block' }}>My categories</Typography>
+                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                            {customCategories.map(cat => (
+                                <CategoryTag key={cat.id} cat={cat} onDelete={() => setPendingDeleteId(cat.id)} />
+                            ))}
+                        </Box>
+                    </Box>
+                    <Divider />
+                </>
+            )}
+            <Button onClick={() => setPendingAccount(true)} variant="outlined" color="error" startIcon={<PersonRemove />} sx={{ mt: 2 }}>
                 Delete account
             </Button>
 

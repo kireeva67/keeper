@@ -204,6 +204,15 @@ export class PrismaController {
                     { userId: null },
                     { user: { email: email } }
                 ]
+            },
+            include: {
+                _count: {
+                    select: {
+                        products: {
+                            where: { user: { email } }
+                        }
+                    }
+                }
             }
         });
     }
