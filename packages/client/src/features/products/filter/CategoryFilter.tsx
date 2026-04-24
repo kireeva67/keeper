@@ -43,7 +43,7 @@ export default function CategoryFilter({ categories, value, onChange, count }: C
                     '&.Mui-selected, &.Mui-selected:hover': {
                         bgcolor: (t) => alpha(t.palette.primary.main, 0.3),
                         color: 'primary.main',
-                        border: (t) => `1px solid ${alpha(t.palette.primary.main, 0.3)} !important`,
+                        border: (t) => `1px solid ${alpha(t.palette.primary.main, 0.8)} !important`,
                         fontWeight: 600,
                     },
                 }}
