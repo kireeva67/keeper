@@ -42,7 +42,7 @@ export function useProductForm({ initialData, onSuccess }: FormProps): UseProduc
             if (err instanceof HttpError && err.status === 401) {
                 return;
             }
-            if (err instanceof HttpError && (err.status === 409 || err.status === 429)) {
+            if (err instanceof HttpError && (err.status === 400 || err.status === 409 || err.status === 429)) {
                 setUrlError(err.message);
             } else {
                 alert("An unexpected error occurred.");

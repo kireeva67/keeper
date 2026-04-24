@@ -3,8 +3,7 @@ import { createHash } from "node:crypto";
 import { TToken } from "../types/Types";
 
 export class TokenUtil {
-    // protected static SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 1; // 1 day
-    protected static SESSION_TTL_MS = 1000 * 60 * 10; // 10 minutes
+    protected static SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 7; // 1 day
 
     public static createToken(): TToken {
         const token = uuidv4();

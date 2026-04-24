@@ -5,7 +5,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { LOGIN_ROUTE, PRODUCTS_ROUTE } from "../../auth/config/authURLS";
 import { ProfileSection } from "../components/ProfileSection";
-import { useCategories } from "../../products/api/useCategories";
 import CategoryTag from "../components/CategoryTag";
 import ConfirmDeletionDialog from "../components/ConfirmDeletionDialog";
 import { useProducts } from "../../products/api/useProducts";
@@ -14,8 +13,7 @@ import { useAuth } from "../../auth/api/useAuth";
 
 export default function SettingsPage() {
     const navigate = useNavigate();
-    const { reassignCategoryInState } = useProducts();
-    const { customCategories, deleteCategory, otherCategory } = useCategories();
+    const { reassignCategoryInState, customCategories, deleteCategory, otherCategory } = useProducts();
     const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
     const pendingCategory = customCategories.find(c => c.id === pendingDeleteId);
     const [pendingAccount, setPendingAccount] = useState(false);

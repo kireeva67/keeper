@@ -1,8 +1,10 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import type { Product } from '../../../shared/types/ProductType';
 import { ProductContext } from '../api/useProducts';
-import { type Category } from '../../../shared/types/CategoryType';
+import { type Category, CATEGORY_ID } from '../../../shared/types/CategoryType';
 import { getProducts } from '../api/getProducts';
+import { getCategoriesForUser } from '../api/getCategories';
+import { http } from '../../../shared/api/http';
 import { useSearchParams } from 'react-router-dom';
 
 export const ProductProvider = ({ children }: { children: React.ReactNode }) => {
@@ -16,6 +18,23 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
     const [categoriesIds, setCategoriesIds] = useState<number[]>(() =>
         searchParams.getAll('category').map(Number)
     );
+    const [categories, setCategories] = useState<Category[]>([]);
+
+    useEffect(() => {
+        getCategoriesForUser().then(setCategories).catch(() => {});
+    }, []);
+
+    const addCategory = (category: Category) => {
+        setCategories(prev => [...prev, { ...category, _count: { products: 0 } }]);
+    };
+
+    const deleteCategory = async (id: number) => {
+        const success = await http(`/api/categories/${id}`, { method: 'DELETE' });
+        if (success) setCategories(prev => prev.filter(c => c.id !== id));
+    };
+
+    const otherCategory = () => categories.find(c => c.id === CATEGORY_ID.Other);
+    const customCategories = categories.filter(c => c.userId);
 
     const loadMore = useCallback(async () => {
         if (loadingRef.current || !hasMore) return;
@@ -65,8 +84,16 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
 
 
     const deleteProductFromState = (id: number) => {
+        const product = products.find(p => p.id === id);
         setProducts(prev => prev.filter(p => p.id !== id));
         setTotal(prev => prev - 1);
+        if (product) {
+            setCategories(prev => prev.map(c =>
+                c.id === product.category.id
+                    ? { ...c, _count: { products: Math.max(0, (c._count?.products ?? 1) - 1) } }
+                    : c
+            ));
+        }
     };
 
     const addProductToState = useCallback((newProduct: Product) => {
@@ -74,6 +101,11 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
             setProducts(prev => [newProduct, ...prev]);
             setTotal(prev => prev + 1);
         }
+        setCategories(prev => prev.map(c =>
+            c.id === newProduct.category.id
+                ? { ...c, _count: { products: (c._count?.products ?? 0) + 1 } }
+                : c
+        ));
     }, [categoriesIds]);
 
     const reassignCategoryInState = (fromCategoryId: number, toCategory: Category) => {
@@ -94,7 +126,12 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
             deleteProductFromState,
             addProductToState,
             reassignCategoryInState,
-            setFilter
+            setFilter,
+            categories,
+            addCategory,
+            deleteCategory,
+            otherCategory,
+            customCategories,
         }}>
             {children}
         </ProductContext.Provider>

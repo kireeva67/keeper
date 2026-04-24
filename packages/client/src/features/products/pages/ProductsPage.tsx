@@ -11,7 +11,6 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { useState } from 'react';
 import { useAuth } from '../../auth/api/useAuth';
 import { UserAvatar } from '../../../shared/components/UserAvatar';
-import { useCategories } from '../api/useCategories';
 import CategoryFilter from '../filter/CategoryFilter';
 import { KeeperLogo } from '../../../shared/components/KeeperLogo';
 
@@ -23,13 +22,12 @@ export default function ProductsPage() {
     const menuOpen = Boolean(anchorEl);
     const openMenu = (e: React.MouseEvent<HTMLElement>) => setAnchorEl(e.currentTarget);
     const closeMenu = () => setAnchorEl(null);
-    const { categories } = useCategories();
-    const { setFilter, categoriesIds, total } = useProducts();
+    const { categories, setFilter, categoriesIds, total } = useProducts();
 
     return (
         <>
             <AppBar position="fixed" color="default" elevation={1}>
-                <Toolbar>
+                <Toolbar disableGutters sx={{ px: 2 }}>
                     <Box sx={{ py: 1, display: 'flex', alignItems: 'center' }}>
                         <KeeperLogo />
                     </Box>
@@ -52,7 +50,7 @@ export default function ProductsPage() {
                         </MenuItem>
                     </Menu>
                 </Toolbar>
-                <Toolbar sx={{ pb: 1, mt: 1, justifyContent: 'center', px: 2 }}>
+                <Toolbar disableGutters sx={{ px: 2, pb: 1, mt: 1 }}>
                     <CategoryFilter
                         categories={categories}
                         value={categoriesIds}

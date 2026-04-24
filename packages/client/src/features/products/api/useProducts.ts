@@ -14,6 +14,11 @@ type ProductContextType = {
     addProductToState: (product: Product) => void;
     reassignCategoryInState: (fromCategoryId: number, toCategory: Category) => void;
     setFilter: (ids: number[]) => void;
+    categories: Category[];
+    addCategory: (category: Category) => void;
+    deleteCategory: (id: number) => Promise<void>;
+    otherCategory: () => Category | undefined;
+    customCategories: Category[];
 };
 
 export const ProductContext = createContext<ProductContextType | undefined>(undefined);
