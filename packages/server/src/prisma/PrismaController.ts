@@ -4,9 +4,8 @@ import { TTableCategoryData, TTableProductData, TToken } from '../types/Types';
 import { PasswordResetTokenUtil } from '../token/PasswordResetTokenUtil';
 import { ValidationError } from '../error/ValidationError';
 
-const DEFAULT_CATEGORY_NAME = 'Other';
-
 export class PrismaController {
+    private readonly defaultCategoryName = 'Other';
 
     public async getUser(email: string) {
         return await prisma.user.findUnique({
@@ -149,11 +148,11 @@ export class PrismaController {
 
     private async getDefaultCategoryId(): Promise<number> {
         const category = await prisma.category.findFirst({
-            where: { name: DEFAULT_CATEGORY_NAME, userId: null },
+            where: { name: this.defaultCategoryName, userId: null },
             select: { id: true }
         });
         if (!category) {
-            throw new Error(`System category "${DEFAULT_CATEGORY_NAME}" is missing.`);
+            throw new Error(`System category "${this.defaultCategoryName}" is missing.`);
         }
         return category.id;
     }
