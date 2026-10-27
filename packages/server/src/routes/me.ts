@@ -3,6 +3,7 @@ import { requireAuth } from "../middleware/CookieMiddleware";
 import { prismaController } from "../prisma/PrismaController";
 import { TTableUserData } from "../types/Types";
 import { getPasswordError, hashPassword, validateNewPassword } from "../utils/password";
+import { logger } from "../utils/logger";
 
 export const meRouter = Router();
 
@@ -11,7 +12,7 @@ meRouter.get('/', requireAuth, (req, res) => {
         const { id, email, password } = (req as any).user as TTableUserData;
         res.json({ id, email, hasPassword: !!password });
     } catch (error) {
-        console.error('Failed to fetch user info:', error);
+        logger.error({ err: error }, 'Failed to fetch user info');
         res.status(500).json({ message: 'Failed to fetch user info.' });
     }
 });
@@ -23,7 +24,7 @@ meRouter.delete('/', requireAuth, async (req, res) => {
         res.clearCookie('sid');
         res.json(true);
     } catch (error) {
-        console.error('Failed to delete account:', error);
+        logger.error({ err: error }, 'Failed to delete account');
         return res.status(500).json({ message: 'Failed to delete account.' });
     }
 });

@@ -1,5 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
 import { prismaController } from "../prisma/PrismaController";
+import { logger } from "../utils/logger";
 
 export async function requireAuth(req: Request, res: Response, next: NextFunction) {
   try {
@@ -19,7 +20,7 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
 
     next();
   } catch (error) {
-    console.error('Auth middleware error:', error);
+    logger.error({ err: error }, 'Auth middleware error');
     return res.status(500).json({ error: "Internal server error" });
   }
 }
