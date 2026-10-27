@@ -1,8 +1,8 @@
-import { log } from "console";
 import { Router } from "express";
 import { requireAuth } from "../middleware/CookieMiddleware";
 import { prismaController } from "../prisma/PrismaController";
 import { TTableCategoryData } from "../types/Types";
+import { ValidationError } from "../error/ValidationError";
 import { addCategoryLimiter } from "../middleware/CategoriesLimiter";
 
 export const categoriesRouter = Router();
@@ -12,7 +12,6 @@ categoriesRouter.get(`/`, requireAuth, async (req, res) => {
     try {
         const user = (req as any).user;
         const categories = await prismaController.getCategoriesForUser(user.email);
-        log('Fetched categories for user:', categories);
         res.json(categories);
     } catch (error) {
         console.error('Failed to fetch categories:', error);
@@ -31,7 +30,6 @@ categoriesRouter.post(`/`, requireAuth, addCategoryLimiter, async (req, res) => 
             });
         }
         const category = await prismaController.createCategory(user.email, body);
-        log('Created category for user:', category);
         res.json(category);
     } catch (error) {
         console.error('Failed to create category:', error);
@@ -46,10 +44,12 @@ categoriesRouter.delete(`/:id`, requireAuth, async (req, res) => {
         if (isNaN(categoryId)) {
             return res.status(400).json({ message: 'Invalid category ID' });
         }
-        log('Attempting to delete category for user:', user, 'categoryId:', req.params);
         await prismaController.deleteCategory(categoryId, user.email);
         res.json(true);
     } catch (error) {
+        if (error instanceof ValidationError) {
+            return res.status(404).json({ message: error.message });
+        }
         console.error('Failed to delete category:', error);
         res.status(500).json({ message: 'Failed to delete category.' });
     }

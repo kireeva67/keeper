@@ -22,13 +22,13 @@ describe('LoginPage', () => {
     it('calls setAuthenticated and navigates on successful login', async () => {
         vi.mocked(checkCredentials).mockResolvedValueOnce(true);
         render(<MemoryRouter><LoginPage /></MemoryRouter>);
-        await userEvent.click(screen.getByRole('button', { name: /login/i }));
+        await userEvent.click(screen.getByRole('button', { name: /^sign in$/i }));
         expect(mockSetAuthenticated).toHaveBeenCalledWith(true);
     });
     it('shows an error when credentials are invalid', async () => {
         vi.mocked(checkCredentials).mockRejectedValueOnce(new Error());
         render(<MemoryRouter><LoginPage /></MemoryRouter>);
-        await userEvent.click(screen.getByRole('button', { name: /login/i }));
+        await userEvent.click(screen.getByRole('button', { name: /^sign in$/i }));
         expect(screen.getAllByText(/email or password is incorrect/i)).toHaveLength(2);
     });
 });

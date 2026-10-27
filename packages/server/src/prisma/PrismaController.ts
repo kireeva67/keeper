@@ -2,6 +2,7 @@ import { prisma } from './prisma'
 import { TokenUtil } from '../token/TokenUtil';
 import { TTableCategoryData, TTableProductData, TToken } from '../types/Types';
 import { PasswordResetTokenUtil } from '../token/PasswordResetTokenUtil';
+import { ValidationError } from '../error/ValidationError';
 
 export class PrismaController {
 
@@ -127,7 +128,22 @@ export class PrismaController {
         });
     }
 
+    // A category is usable if it is a system default (userId null) or belongs to the user.
+    private async assertCategoryAvailable(categoryId: number, email: string) {
+        const category = await prisma.category.findFirst({
+            where: {
+                id: categoryId,
+                OR: [{ userId: null }, { user: { email } }]
+            },
+            select: { id: true }
+        });
+        if (!category) {
+            throw new ValidationError('Category not found.');
+        }
+    }
+
     public async createProduct(email: string, data: TTableProductData) {
+        await this.assertCategoryAvailable(data.categoryId, email);
         return await prisma.product.create({
             data: {
                 user: { connect: { email: email } },
@@ -153,6 +169,7 @@ export class PrismaController {
     }
 
     public async updateProduct(id: number, email: string, data: TTableProductData) {
+        await this.assertCategoryAvailable(data.categoryId, email);
         return await prisma.product.update({
             where: {
                 id: id,
@@ -240,9 +257,16 @@ export class PrismaController {
     }
 
     public async deleteCategory(id: number, email: string) {
+        const owned = await prisma.category.findFirst({
+            where: { id, user: { email } },
+            select: { id: true }
+        });
+        if (!owned) {
+            throw new ValidationError('Category not found.');
+        }
         await prisma.$transaction([
             prisma.product.updateMany({
-                where: { categoryId: id },
+                where: { categoryId: id, user: { email } },
                 data: { categoryId: 1 },
             }),
             prisma.category.delete({

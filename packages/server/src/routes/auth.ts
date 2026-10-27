@@ -1,35 +1,42 @@
 import passport from "passport";
 import { Router } from "express";
+import type { NextFunction, Request, Response } from "express";
 import { TTableUserData, TToken } from "../types/Types";
 import { prismaController } from "../prisma/PrismaController";
 import { getCookieDefaults } from "../utils/getCookie";
-import { log } from "console";
+import { normalizeEmail } from "../utils/normalizeEmail";
 import { getPasswordError, hashPassword, validateNewPassword } from "../utils/password";
 import { requireAuth } from "../middleware/CookieMiddleware";
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+let resendClient: Resend | null = null;
+function getResend() {
+    resendClient ??= new Resend(process.env.RESEND_API_KEY);
+    return resendClient;
+}
 
 export const authRouter = Router();
 
-authRouter.get('/google',
+const googleEnabled = !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET);
+const requireGoogle = (_req: Request, res: Response, next: NextFunction) =>
+    googleEnabled ? next() : res.status(503).json({ message: 'Google sign-in is not configured.' });
+
+authRouter.get('/google', requireGoogle,
     passport.authenticate('google', { scope: ['profile', 'email'] }));
 
 // session: false = don't try to serialize the authenticated user into a session, as i hadle sessions myself
-authRouter.get('/google/callback', passport.authenticate('google', { failureRedirect: '/login', session: false }), async (req, res) => {
+authRouter.get('/google/callback', requireGoogle, passport.authenticate('google', { failureRedirect: '/login', session: false }), async (req, res) => {
     const user = req.user as TTableUserData;
     const token: TToken = await prismaController.createSession(user.email);
-    log('Created session token:', token);
     res.cookie("sid", token.token, getCookieDefaults(token.validTo));
-    log('Set session cookie', res.cookie);
     res.redirect(`${process.env.CLIENT_URL}/products`);
 });
 
 authRouter.post('/signup', async (req, res) => {
     try {
-        const { email, password } = req.body;
+        const { password } = req.body;
+        const email = normalizeEmail(req.body.email);
         const existingUser = await prismaController.findUser(email);
-        log('Signup attempt for email:', email, 'existing user:', existingUser);
         if (existingUser) {
             return res.status(409).json({ message: 'User with this email already exists.' });
         }
@@ -50,20 +57,18 @@ authRouter.post('/signup', async (req, res) => {
 
 authRouter.post('/login', async (req, res) => {
     try {
-        const { email, password } = req.body;
+        const { password } = req.body;
+        const email = normalizeEmail(req.body.email);
         const user = await prismaController.findUser(email);
-        log('Login attempt for email:', email, 'found user:', user);
         if (!user || !user.password) {
             return res.status(400).json({ message: 'Invalid credentials' });
         }
         const passwordError = await getPasswordError(user.password, password);
-        log('Password validation result for email:', email, 'error:', passwordError);
         if (passwordError) {
             return res.status(400).json({ message: 'Invalid credentials' });
         }
         const token = await prismaController.createSession(user.email);
         res.cookie("sid", token.token, getCookieDefaults(token.validTo));
-        log('User logged in, session cookie set:', token);
         res.json(true);
     } catch (error) {
         console.error('Failed to login:', error);
@@ -85,14 +90,14 @@ authRouter.delete('/session', requireAuth, async (req, res) => {
 authRouter.post('/forgot-password', async (req, res) => {
     const GENERIC_RESPONSE = { message: 'If this email is registered, you will receive a reset link.' };
     try {
-        const { email } = req.body;
+        const email = normalizeEmail(req.body.email);
         const user = await prismaController.findUser(email);
         if (!user) {
             return res.status(200).json(GENERIC_RESPONSE);
         }
         const token = await prismaController.createResetPasswordToken(email);
         const resetLink = `${process.env.CLIENT_URL}/reset-password?token=${token.token}`;
-        const { error } = await resend.emails.send({
+        const { error } = await getResend().emails.send({
             from: 'onboarding@resend.dev',
             to: email,
             subject: 'Reset your password',

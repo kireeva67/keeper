@@ -1,4 +1,3 @@
-import { log } from 'node:console';
 import ogs from 'open-graph-scraper';
 
 export async function getMetadata(url: string) {
@@ -15,7 +14,6 @@ export async function getMetadata(url: string) {
 
     try {
         const { result } = await ogs(options);
-        log('Metadata fetched successfully for URL:', url, 'Result:', result);
         return {
             // We grab the first available image URL
             image: result.ogImage?.[0]?.url || result.twitterImage?.[0]?.url || null,

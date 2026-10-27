@@ -1,7 +1,8 @@
 {
   "compilerOptions": {
     "module": "ESNext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
+    "skipLibCheck": true,
     "target": "ES2023",
     "strict": true,
     "esModuleInterop": true,
