@@ -58,10 +58,26 @@ describe('POST /auth/signup', () => {
         expect(res.body).toEqual(true);
         expect(res.headers['set-cookie']).toBeDefined();
     });
+
+    it('lowercases the email before looking it up and saving it', async () => {
+        vi.mocked(prismaController.findUser).mockResolvedValueOnce(undefined as any);
+        await request(app).post('/auth/signup')
+            .send({ email: ' Test@Example.COM ', password: 'ValidPass1!' });
+        expect(prismaController.findUser).toHaveBeenCalledWith('test@example.com');
+        expect(prismaController.upsertUser).toHaveBeenCalledWith('test@example.com', expect.anything());
+    });
 });
 
 
 describe('POST /auth/login', () => {
+
+    it('lowercases the email before looking it up', async () => {
+        vi.mocked(prismaController.findUser).mockResolvedValueOnce(undefined as any);
+        await request(app).post('/auth/login')
+            .send({ email: 'Test@Example.COM', password: 'ValidPass1!' });
+        expect(prismaController.findUser).toHaveBeenCalledWith('test@example.com');
+    });
+
     beforeEach(() => {
         vi.clearAllMocks();
     });

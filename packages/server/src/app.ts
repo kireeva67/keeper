@@ -35,11 +35,10 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
             };
 
             const user = await prismaController.upsertUser(email, "");
-            log('Upserted user:', user);
             return done(null, { password: user.password, email });
         }));
 } else {
-    throw new Error('Google OAuth credentials not set');
+    console.warn('Google OAuth credentials not set: Google sign-in is disabled.');
 }
 
 app.get(`/api/healthCheck`, requireAuth, async (req, res) => {

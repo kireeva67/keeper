@@ -1,11 +1,9 @@
 import type { Request, Response, NextFunction } from "express";
 import { prismaController } from "../prisma/PrismaController";
-import { log } from "node:console";
 
 export async function requireAuth(req: Request, res: Response, next: NextFunction) {
   try {
     const raw = req.cookies?.sid;
-    log('Auth middleware - session id from cookie:', raw);
     if (!raw) {
       return res.status(401).json({ error: 'Unauthorized' });
     };

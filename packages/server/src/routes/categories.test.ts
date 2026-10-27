@@ -1,4 +1,5 @@
 import request from "supertest";
+import { ValidationError } from "../error/ValidationError";
 import { prismaController } from "../prisma/PrismaController";
 import { app } from "../app";
 
@@ -62,5 +63,12 @@ describe('DELETE /api/categories/:id', () => {
         vi.mocked(prismaController.deleteCategory).mockResolvedValueOnce({ categoryId: 111 } as any);
         const res = await request(app).delete('/api/categories/11')
         expect(res.body).toEqual(true);
+    });
+
+    it('returns 404 if the category is not owned by the user', async () => {
+        vi.mocked(prismaController.deleteCategory).mockRejectedValueOnce(new ValidationError('Category not found.'));
+        const res = await request(app).delete('/api/categories/11')
+        expect(res.status).toBe(404);
+        expect(res.body).toEqual({ message: 'Category not found.' });
     });
 })

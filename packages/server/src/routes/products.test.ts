@@ -3,6 +3,7 @@ import { app } from "../app";
 import { prismaController } from "../prisma/PrismaController";
 import { isSafeUrl } from "../utils/isSafeUrl";
 import request from "supertest";
+import { ValidationError } from "../error/ValidationError";
 
 const mockedUser = { email: 'test@example.com', password: 'ValidPass1!' };
 
@@ -66,6 +67,16 @@ describe('POST /api/products', () => {
             .send({ url: "http://test", email: mockedUser.email });
         expect(res.body).toEqual({ url: "http://test", email: mockedUser.email });
     })
+
+    it('returns 400 if the category is not available to the user', async () => {
+        vi.mocked(isSafeUrl).mockReturnValueOnce(true);
+        vi.mocked(prismaController.findProductByUrl).mockResolvedValueOnce(undefined as any);
+        vi.mocked(prismaController.createProduct).mockRejectedValueOnce(new ValidationError('Category not found.'));
+        const res = await request(app).post('/api/products')
+            .send({ url: "http://test", categoryId: 999 });
+        expect(res.status).toBe(400);
+        expect(res.body).toEqual({ message: 'Category not found.' });
+    });
 })
 
 describe('DELETE /api/products/:id', () => {

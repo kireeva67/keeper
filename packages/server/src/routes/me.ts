@@ -1,4 +1,3 @@
-import { log } from "console";
 import { Router } from "express";
 import { requireAuth } from "../middleware/CookieMiddleware";
 import { prismaController } from "../prisma/PrismaController";
@@ -9,10 +8,8 @@ export const meRouter = Router();
 
 meRouter.get('/', requireAuth, (req, res) => {
     try {
-        const user = (req as any).user as TTableUserData;
-        user.hasPassword = !!user.password;
-        log('Fetching current user info:', (req as any).user);
-        res.json((req as any).user);
+        const { id, email, password } = (req as any).user as TTableUserData;
+        res.json({ id, email, hasPassword: !!password });
     } catch (error) {
         console.error('Failed to fetch user info:', error);
         res.status(500).json({ message: 'Failed to fetch user info.' });

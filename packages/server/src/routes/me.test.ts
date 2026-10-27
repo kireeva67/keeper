@@ -4,7 +4,7 @@ import { app } from "../app";
 import { requireAuth } from "../middleware/CookieMiddleware";
 import { getPasswordError, validateNewPassword } from "../utils/password";
 
-const mockedUser = { email: 'test@example.com', password: 'ValidPass1!' };
+const mockedUser = { id: 7, email: 'test@example.com', password: 'ValidPass1!', passwordResetToken: 'secret' };
 
 vi.mock('../prisma/PrismaController', () => ({
     prismaController: {
@@ -44,7 +44,7 @@ describe('GET /api/me', () => {
 
     it('returns user email + hasPassword flag', async () => {
         const res = await request(app).get('/api/me');
-        expect(res.body).toEqual({ email: mockedUser.email, "hasPassword": true, "password": "ValidPass1!", });
+        expect(res.body).toEqual({ id: 7, email: mockedUser.email, hasPassword: true });
     });
 })
 
