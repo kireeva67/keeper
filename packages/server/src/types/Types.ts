@@ -10,7 +10,7 @@ export type TTableProductData = {
     description?: string;
     url: string;
     imageUrl?: string | null;
-    categoryId: number;
+    categoryId?: number;
 }
 
 export type TTableCategoryData = {
