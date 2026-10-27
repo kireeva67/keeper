@@ -183,3 +183,38 @@ Cards are currently overflowing on mobile. Follow these rules:
 - Do not use `!important` in `sx` props
 - Do not use random colors for categories — always derive from the hash function
 - Do not mix `variant="outlined"` and `variant="contained"` for the same action type across different screens
+
+---
+
+# Development Notes
+
+Working agreements and gotchas for developing Keeper (separate from the design rules above).
+
+## Running locally
+
+- `npm run dev` starts the client (Vite, `http://localhost:5173`) and the API (`http://localhost:3000`). The client reads the API address from `VITE_API_URL` in `packages/client/.env`.
+- Port 3000 may already be used by a Docker container from another project. Check with `lsof -nP -iTCP:3000 -sTCP:LISTEN` before starting. Never stop containers or processes you did not start; ask first.
+- Server env lives in `packages/server/.env` (never commit it). Google sign-in is optional: without `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` the server warns and `/auth/google*` returns 503.
+
+## Data and testing
+
+- `packages/server/dev.db` can hold real data. Test with throwaway users (`something@example.invalid`), delete them afterwards and re-check the row counts.
+- Server tests mock Prisma, so database behavior needs a separate real-database check, for example a temporary `tsx` script (delete it afterwards). To run a second server instance, use a temporary entry file on another port (for example 3101).
+- Run before every PR: `npx tsc --noEmit` and `npx vitest run` in `packages/server`; `npx tsc -b` and `npx vitest run` in `packages/client`.
+
+## Server conventions
+
+- Log with the pino `logger` from `src/utils/logger.ts`: `logger.error({ err: error }, 'message')`. Do not use `console.*`. Never log headers, cookies, passwords or tokens.
+- Throw `ValidationError` for bad client input; the routes turn it into 400 (404 for a missing category on delete).
+- Emails are lowercased with `normalizeEmail()` at the auth entry points (signup, login, forgot-password).
+- The default category is the system category named "Other" (no user), found by name in `PrismaController`, not by id. A product created without `categoryId` goes there.
+- `GET /api/me` returns only `{ id, email, hasPassword }`. Never return the user row.
+- Declare constants as fields of the class that uses them, not at the top of the file.
+
+## Git workflow
+
+- One branch per step, named in camelCase (for example `fixLoginRedirect`). The repo owner merges each PR; pull `main` before starting the next branch.
+- `gh` may not be installed. Push the branch and open the PR from the compare URL that `git push` prints: `https://github.com/kireeva67/keeper/pull/new/<branch>`.
+- Do not add `Co-Authored-By` or other attribution lines to commits or PR descriptions.
+- `docs/ROADMAP.md` is the plan and status tracker. It is gitignored (personal notes), so it never appears in PRs. Decisions so far: deploy to a Raspberry Pi over Tailscale first, and move to a VPS only if other users or public access appear. Build multi-arch images (arm64 and amd64).
+- Known deferred items: the schema default `categoryId @default(1)` (needs a migration); `pino-pretty` for readable dev logs; the Docker base image should be Node 20.19+ or 22 because Prisma 7.10 requires it.
