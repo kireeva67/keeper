@@ -5,6 +5,7 @@ import { PasswordResetTokenUtil } from '../token/PasswordResetTokenUtil';
 import { ValidationError } from '../error/ValidationError';
 
 export class PrismaController {
+    private readonly defaultCategoryName = 'Other';
 
     public async getUser(email: string) {
         return await prisma.user.findUnique({
@@ -130,6 +131,9 @@ export class PrismaController {
 
     // A category is usable if it is a system default (userId null) or belongs to the user.
     private async assertCategoryAvailable(categoryId: number, email: string) {
+        if (!Number.isInteger(categoryId)) {
+            throw new ValidationError('Invalid category.');
+        }
         const category = await prisma.category.findFirst({
             where: {
                 id: categoryId,
@@ -142,8 +146,20 @@ export class PrismaController {
         }
     }
 
+    private async getDefaultCategoryId(): Promise<number> {
+        const category = await prisma.category.findFirst({
+            where: { name: this.defaultCategoryName, userId: null },
+            select: { id: true }
+        });
+        if (!category) {
+            throw new Error(`System category "${this.defaultCategoryName}" is missing.`);
+        }
+        return category.id;
+    }
+
     public async createProduct(email: string, data: TTableProductData) {
-        await this.assertCategoryAvailable(data.categoryId, email);
+        const categoryId = data.categoryId ?? await this.getDefaultCategoryId();
+        await this.assertCategoryAvailable(categoryId, email);
         return await prisma.product.create({
             data: {
                 user: { connect: { email: email } },
@@ -151,7 +167,7 @@ export class PrismaController {
                 description: data.description || "",
                 url: data.url,
                 imageUrl: data.imageUrl,
-                category: { connect: { id: data.categoryId } }
+                category: { connect: { id: categoryId } }
             },
             include: { category: true },
         });
@@ -169,6 +185,9 @@ export class PrismaController {
     }
 
     public async updateProduct(id: number, email: string, data: TTableProductData) {
+        if (data.categoryId == null) {
+            throw new ValidationError('Category is required.');
+        }
         await this.assertCategoryAvailable(data.categoryId, email);
         return await prisma.product.update({
             where: {
@@ -264,10 +283,11 @@ export class PrismaController {
         if (!owned) {
             throw new ValidationError('Category not found.');
         }
+        const defaultCategoryId = await this.getDefaultCategoryId();
         await prisma.$transaction([
             prisma.product.updateMany({
                 where: { categoryId: id, user: { email } },
-                data: { categoryId: 1 },
+                data: { categoryId: defaultCategoryId },
             }),
             prisma.category.delete({
                 where: { id, user: { email } },
