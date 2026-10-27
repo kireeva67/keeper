@@ -8,6 +8,7 @@ import { normalizeEmail } from "../utils/normalizeEmail";
 import { getPasswordError, hashPassword, validateNewPassword } from "../utils/password";
 import { requireAuth } from "../middleware/CookieMiddleware";
 import { Resend } from "resend";
+import { logger } from "../utils/logger";
 
 let resendClient: Resend | null = null;
 function getResend() {
@@ -50,7 +51,7 @@ authRouter.post('/signup', async (req, res) => {
         res.cookie("sid", token.token, getCookieDefaults(token.validTo));
         res.json(true);
     } catch (error) {
-        console.error('Failed to sign up:', error);
+        logger.error({ err: error }, 'Failed to sign up');
         res.status(500).json({ message: 'Failed to sign up.' });
     }
 });
@@ -71,7 +72,7 @@ authRouter.post('/login', async (req, res) => {
         res.cookie("sid", token.token, getCookieDefaults(token.validTo));
         res.json(true);
     } catch (error) {
-        console.error('Failed to login:', error);
+        logger.error({ err: error }, 'Failed to login');
         res.status(500).json({ message: 'Invalid credentials.' });
     }
 });
@@ -82,7 +83,7 @@ authRouter.delete('/session', requireAuth, async (req, res) => {
         res.clearCookie('sid');
         res.json(true);
     } catch (error) {
-        console.error('Failed to logout:', error);
+        logger.error({ err: error }, 'Failed to logout');
         return res.status(500).json({ message: 'Failed to logout.' });
     }
 });
@@ -104,13 +105,13 @@ authRouter.post('/forgot-password', async (req, res) => {
             html: `<p>Click <a href="${resetLink}">here</a> to reset your password. The link expires in 1 hour.</p>`,
         });
         if (error) {
-            console.error('Failed to send reset email:', error);
+            logger.error({ err: error }, 'Failed to send reset email');
             await prismaController.clearResetToken(email);
             return res.status(500).json({ message: 'Failed to send reset email.' });
         }
         return res.status(200).json(GENERIC_RESPONSE);
     } catch (error) {
-        console.error('Failed to reset password:', error);
+        logger.error({ err: error }, 'Failed to reset password');
         return res.status(500).json({ message: 'Failed to reset password.' });
     }
 });
@@ -131,7 +132,7 @@ authRouter.post('/reset-password', async (req, res) => {
         await prismaController.clearResetToken(user.email);
         return res.status(200).json(true);
     } catch (error) {
-        console.error('Failed to reset password:', error);
+        logger.error({ err: error }, 'Failed to reset password');
         return res.status(500).json({ message: 'Failed to reset password.' });
     }
 });

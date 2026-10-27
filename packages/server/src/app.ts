@@ -3,7 +3,8 @@ import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import dotenv from 'dotenv';
 import { prismaController } from './prisma/PrismaController';
-import { log } from 'node:console';
+import { pinoHttp } from 'pino-http';
+import { logger } from './utils/logger';
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import { requireAuth } from './middleware/CookieMiddleware';
@@ -17,7 +18,14 @@ export const app = express();
 app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
 app.use(express.json());
 app.use(cookieParser());
-app.use((req, _res, next) => { log(`→ ${req.method} ${req.path}`); next(); });
+app.use(pinoHttp({
+    logger,
+    // Log only what is needed to debug a request; never headers (cookies, auth).
+    serializers: {
+        req: (req) => ({ id: req.id, method: req.method, url: req.url }),
+        res: (res) => ({ statusCode: res.statusCode }),
+    },
+}));
 app.use(passport.initialize());
 
 // Set up Google Strategy
@@ -38,7 +46,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
             return done(null, { password: user.password, email });
         }));
 } else {
-    console.warn('Google OAuth credentials not set: Google sign-in is disabled.');
+    logger.warn('Google OAuth credentials not set: Google sign-in is disabled.');
 }
 
 app.get(`/api/healthCheck`, requireAuth, async (req, res) => {

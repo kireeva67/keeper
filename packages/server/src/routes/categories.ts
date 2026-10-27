@@ -4,6 +4,7 @@ import { prismaController } from "../prisma/PrismaController";
 import { TTableCategoryData } from "../types/Types";
 import { ValidationError } from "../error/ValidationError";
 import { addCategoryLimiter } from "../middleware/CategoriesLimiter";
+import { logger } from "../utils/logger";
 
 export const categoriesRouter = Router();
 
@@ -14,7 +15,7 @@ categoriesRouter.get(`/`, requireAuth, async (req, res) => {
         const categories = await prismaController.getCategoriesForUser(user.email);
         res.json(categories);
     } catch (error) {
-        console.error('Failed to fetch categories:', error);
+        logger.error({ err: error }, 'Failed to fetch categories');
         res.status(500).json({ message: 'Could not load your categories.' });
     }
 });
@@ -32,7 +33,7 @@ categoriesRouter.post(`/`, requireAuth, addCategoryLimiter, async (req, res) => 
         const category = await prismaController.createCategory(user.email, body);
         res.json(category);
     } catch (error) {
-        console.error('Failed to create category:', error);
+        logger.error({ err: error }, 'Failed to create category');
         res.status(500).json({ message: 'Internal server error' });
     }
 });
@@ -50,7 +51,7 @@ categoriesRouter.delete(`/:id`, requireAuth, async (req, res) => {
         if (error instanceof ValidationError) {
             return res.status(404).json({ message: error.message });
         }
-        console.error('Failed to delete category:', error);
+        logger.error({ err: error }, 'Failed to delete category');
         res.status(500).json({ message: 'Failed to delete category.' });
     }
 });

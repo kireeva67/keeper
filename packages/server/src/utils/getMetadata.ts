@@ -1,4 +1,5 @@
 import ogs from 'open-graph-scraper';
+import { logger } from "./logger";
 
 export async function getMetadata(url: string) {
     const options = {
@@ -19,7 +20,8 @@ export async function getMetadata(url: string) {
             image: result.ogImage?.[0]?.url || result.twitterImage?.[0]?.url || null,
         };
     } catch (error) {
-        console.error('Error fetching metadata:', error);
+        // open-graph-scraper throws a plain object that includes the fetched html; log only the reason.
+        logger.error({ reason: (error as { error?: unknown })?.error ?? String(error) }, 'Error fetching metadata');
         return { image: null };
     }
 }

@@ -7,6 +7,7 @@ import { getMetadata } from "../utils/getMetadata";
 import { isSafeUrl } from "../utils/isSafeUrl";
 import { Prisma } from "../../generated/prisma";
 import { ValidationError } from "../error/ValidationError";
+import { logger } from "../utils/logger";
 
 export const productsRouter = Router();
 
@@ -23,7 +24,7 @@ productsRouter.get(`/`, requireAuth, async (req, res) => {
         ]); const nextCursor = products.length === limit ? products[products.length - 1].id : null;
         res.json({ products, nextCursor, total });
     } catch (error) {
-        console.error('Failed to fetch products:', error);
+        logger.error({ err: error }, 'Failed to fetch products');
         res.status(500).json({ message: 'Could not load your products.' });
     }
 });
@@ -49,7 +50,7 @@ productsRouter.post(`/`, requireAuth, addProductLimiter, async (req, res) => {
         if (error instanceof ValidationError) {
             return res.status(400).json({ message: error.message });
         }
-        console.error('Failed to create product:', error);
+        logger.error({ err: error }, 'Failed to create product');
         res.status(500).json({ message: 'Internal server error' });
     }
 });
@@ -64,7 +65,7 @@ productsRouter.delete(`/:id`, requireAuth, async (req, res) => {
         await prismaController.deleteProduct(productId, user.email);
         res.json(true);
     } catch (error) {
-        console.error('Failed to delete product:', error);
+        logger.error({ err: error }, 'Failed to delete product');
         res.status(500).json({ message: 'Failed to delete product.' });
     }
 });
@@ -103,7 +104,7 @@ productsRouter.get(`/:id`, requireAuth, async (req, res) => {
         }
         res.json(product);
     } catch (error) {
-        console.error('Failed to fetch product:', error);
+        logger.error({ err: error }, 'Failed to fetch product');
         res.status(500).json({ message: 'Failed to fetch product.' });
     }
 });
