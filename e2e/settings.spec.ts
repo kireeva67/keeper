@@ -22,11 +22,6 @@ test.describe('settings', () => {
     });
 
     test('12b. password can be changed and used to log in', async ({ page }) => {
-        // Known bug: the "Current password" field in ProfileSection.tsx is bound to the
-        // new password state, so the change never reaches the server. It currently fails
-        // at the "Password updated successfully" check. Remove test.fail() once it is
-        // fixed; Playwright reports an error when this test starts passing.
-        test.fail(true, 'Known bug: "Current password" field is bound to the new password');
         const newPassword = 'E2e-new-456!';
 
         await page.getByLabel('Current password').fill(app.password);
@@ -37,6 +32,20 @@ test.describe('settings', () => {
         await app.page.goto('/products');
         await app.logOut();
         await app.logIn(email, newPassword);
+        await expect(page).toHaveURL(/\/products$/);
+    });
+
+    test('12c. wrong current password shows an error and keeps the old password', async ({ page }) => {
+        await page.getByLabel('Current password').fill('Wrong-pass-999!');
+        await page.getByLabel('New password').fill('E2e-new-456!');
+        await page.getByRole('button', { name: 'Update password' }).click();
+
+        await expect(page.getByText('Current password is incorrect')).toBeVisible();
+        await expect(page.getByText('Password updated successfully')).toBeHidden();
+
+        await app.page.goto('/products');
+        await app.logOut();
+        await app.logIn(email);
         await expect(page).toHaveURL(/\/products$/);
     });
 

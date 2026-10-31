@@ -47,8 +47,8 @@ export function ProfileSection() {
                 {hasPassword && (
                     <PasswordTextField
                         label="Current password" size="small" fullWidth
-                        value={newPassword} onChange={e => setNewPassword(e.target.value)}
-                        error={!!errors.new} helperText={errors.new}
+                        value={currentPassword} onChange={e => setCurrentPassword(e.target.value)}
+                        error={!!errors.current} helperText={errors.current}
                     />
                 )}
                 <PasswordTextField
