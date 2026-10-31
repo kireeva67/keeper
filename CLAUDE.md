@@ -200,7 +200,8 @@ Working agreements and gotchas for developing Keeper (separate from the design r
 
 - `packages/server/dev.db` can hold real data. Test with throwaway users (`something@example.invalid`), delete them afterwards and re-check the row counts.
 - Server tests mock Prisma, so database behavior needs a separate real-database check, for example a temporary `tsx` script (delete it afterwards). To run a second server instance, use a temporary entry file on another port (for example 3101).
-- Run before every PR: `npx tsc --noEmit` and `npx vitest run` in `packages/server`; `npx tsc -b` and `npx vitest run` in `packages/client`.
+- Run before every PR: `npx tsc --noEmit` and `npx vitest run` in `packages/server`; `npx tsc -b` and `npx vitest run` in `packages/client`; `npm run test:e2e` and `npx tsc -p e2e` at the root.
+- E2E tests (Playwright, `e2e/`) run their own API on 3201 and client on 5201 against a fresh `packages/server/e2e.db`, so they never touch `dev.db`. Shared steps live in the `KeeperApp` page object; every test signs up its own `@example.invalid` account. Product URLs use `https://shop.example.invalid/...` because the server's SSRF check (`isSafeUrl`) rejects localhost pages. Tests that fetch real sites are tagged `@network` (skip with `--grep-invert @network`). A test for a known, unfixed bug is marked `test.fail(true, '<reason>')`; remove the marker in the fix.
 
 ## Server conventions
 
@@ -217,4 +218,4 @@ Working agreements and gotchas for developing Keeper (separate from the design r
 - `gh` may not be installed. Push the branch and open the PR from the compare URL that `git push` prints: `https://github.com/kireeva67/keeper/pull/new/<branch>`.
 - Do not add `Co-Authored-By` or other attribution lines to commits or PR descriptions.
 - `docs/ROADMAP.md` is the plan and status tracker. It is gitignored (personal notes), so it never appears in PRs. Decisions so far: deploy to a Raspberry Pi over Tailscale first, and move to a VPS only if other users or public access appear. Build multi-arch images (arm64 and amd64).
-- Known deferred items: the schema default `categoryId @default(1)` (needs a migration); `pino-pretty` for readable dev logs; the Docker base image should be Node 20.19+ or 22 because Prisma 7.10 requires it.
+- Known deferred items: `pino-pretty` for readable dev logs; the Docker base image should be Node 20.19+ or 22 because Prisma 7.10 requires it.
