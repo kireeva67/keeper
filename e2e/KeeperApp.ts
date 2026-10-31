@@ -53,12 +53,13 @@ export class KeeperApp {
 
     // Adds a product through the new product dialog. `category` picks an existing one
     // (as shown in the picker, lowercase); `newCategory` creates a custom one first,
-    // which selects it. With neither, the default category is kept.
-    async addProduct(title: string, slug: string, options: { category?: string; newCategory?: string } = {}): Promise<void> {
+    // which selects it. With neither, the default category is kept. `url` replaces the
+    // fake `.invalid` address built from `slug` (only for @network tests).
+    async addProduct(title: string, slug: string, options: { category?: string; newCategory?: string; url?: string } = {}): Promise<void> {
         await this.page.getByRole('button', { name: 'add product' }).click();
         const dialog = this.page.getByRole('dialog', { name: 'New product' });
         await dialog.getByLabel('Title').fill(title);
-        await dialog.getByLabel('URL').fill(this.productUrl(slug));
+        await dialog.getByLabel('URL').fill(options.url ?? this.productUrl(slug));
         if (options.category) {
             await dialog.getByRole('button', { name: options.category, exact: true }).click();
         }
@@ -75,6 +76,10 @@ export class KeeperApp {
 
     card(title: string): Locator {
         return this.page.locator('.MuiCard-root').filter({ has: this.page.getByRole('heading', { name: title, exact: true }) });
+    }
+
+    cardImage(title: string): Locator {
+        return this.card(title).getByRole('img', { name: title });
     }
 
     cardCategory(title: string): Locator {
