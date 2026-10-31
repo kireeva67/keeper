@@ -7,9 +7,11 @@
     "scripts": {
         "dev": "concurrently -n client,server \"npm -w @repo/client run dev\" \"npm -w @repo/server run dev\"",
         "build": "npm -w @repo/client run build && npm -w @repo/server run build",
-        "studio": "npm run studio -w packages/server"
+        "studio": "npm run studio -w packages/server",
+        "test:e2e": "playwright test"
     },
     "devDependencies": {
+        "@playwright/test": "^1.64.1",
         "@types/bcrypt": "^6.0.0",
         "@types/cors": "^2.8.19",
         "concurrently": "^9.2.1"

@@ -104,6 +104,19 @@ npm -w @repo/client run lint
 
 Server tests mock Prisma, so they do not touch the database.
 
+### End-to-end tests
+
+Browser tests (Playwright) live in `e2e/` and click through the main flows: sign-up and login, bookmarks and categories, settings. Each test signs up its own throwaway `@example.invalid` account.
+
+```bash
+npx playwright install chromium               # once, downloads the browser
+npm run test:e2e                              # all tests
+npx playwright test --grep-invert @network    # skip tests that need the internet
+npx tsc -p e2e                                # type check the tests
+```
+
+Playwright starts its own API on port `3201` and client on port `5201`, so the tests can run next to `npm run dev`. The API uses a fresh database, `packages/server/e2e.db`, rebuilt from the migrations on every run; `dev.db` is never touched. Bookmarks use fake `https://shop.example.invalid/...` addresses, so no real site is contacted, except by tests tagged `@network`, which fetch a real page to check that its preview image loads. On failure, the screenshot and trace are in `test-results/` (`npx playwright show-trace <trace.zip>`).
+
 ### Build
 
 ```bash
