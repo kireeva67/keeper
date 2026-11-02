@@ -64,11 +64,10 @@ export class KeeperApp {
             await dialog.getByRole('button', { name: options.category, exact: true }).click();
         }
         if (options.newCategory) {
-            await dialog.locator('button:has(svg[data-testid="AddIcon"])').click();
-            const categoryDialog = this.page.getByRole('dialog', { name: 'New category' });
-            await categoryDialog.getByLabel('Name').fill(options.newCategory);
-            await categoryDialog.getByRole('button', { name: 'Create' }).click();
-            await expect(categoryDialog).toBeHidden();
+            await dialog.getByRole('button', { name: 'New category' }).click();
+            await dialog.getByLabel('Name').fill(options.newCategory);
+            await dialog.getByRole('button', { name: 'Add', exact: true }).click();
+            await expect(dialog.getByRole('heading', { name: 'New category' })).toBeHidden();
         }
         await dialog.getByRole('button', { name: 'Create' }).click();
         await expect(dialog).toBeHidden();

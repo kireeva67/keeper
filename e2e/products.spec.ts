@@ -41,6 +41,27 @@ test.describe('products and categories', () => {
         await expect(app.cardCategory('Edit me')).toHaveText('films');
     });
 
+    test('adding a category swaps the product dialog content and keeps typed values', async ({ page }) => {
+        await page.getByRole('button', { name: 'add product' }).click();
+        const dialog = page.getByRole('dialog', { name: 'New product' });
+        await dialog.getByLabel('Title').fill('Kept title');
+
+        // Escape leaves the category view, not the whole dialog.
+        await dialog.getByRole('button', { name: 'New category' }).click();
+        await expect(dialog.getByRole('heading', { name: 'New category' })).toBeVisible();
+        await expect(page.getByRole('dialog')).toHaveCount(1);
+        await page.keyboard.press('Escape');
+        await expect(dialog.getByRole('heading', { name: 'New category' })).toBeHidden();
+        await expect(dialog.getByLabel('Title')).toHaveValue('Kept title');
+        await expect(dialog.getByRole('button', { name: 'New category' })).toBeFocused();
+
+        await dialog.getByRole('button', { name: 'New category' }).click();
+        await dialog.getByLabel('Name').fill('Swapped');
+        await dialog.getByRole('button', { name: 'Add', exact: true }).click();
+        await expect(dialog.getByLabel('Title')).toHaveValue('Kept title');
+        await expect(dialog.getByRole('button', { name: 'swapped', exact: true })).toHaveAttribute('aria-pressed', 'true');
+    });
+
     test('9. deleting a custom category moves its products to "Other"', async ({ page }) => {
         await app.addProduct('Tagged', 'tagged', { newCategory: 'temp' });
         await expect(app.cardCategory('Tagged')).toHaveText('temp');

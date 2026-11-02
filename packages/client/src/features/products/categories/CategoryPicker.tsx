@@ -1,3 +1,4 @@
+import type { Ref } from "react";
 import { Box, ToggleButton, ToggleButtonGroup } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import type { Category } from "../../../shared/types/CategoryType";
@@ -8,9 +9,10 @@ type Props = {
     value: number;
     onChange: (id: number) => void;
     onAdd?: () => void;
+    addButtonRef?: Ref<HTMLButtonElement>;
 }
 
-export default function CategoryPicker({ categories, value, onChange, onAdd }: Props) {
+export default function CategoryPicker({ categories, value, onChange, onAdd, addButtonRef }: Props) {
     return (
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 2, alignItems: 'center' }}>
             <ToggleButtonGroup
@@ -45,6 +47,8 @@ export default function CategoryPicker({ categories, value, onChange, onAdd }: P
                 <Box
                     component="button"
                     type="button"
+                    ref={addButtonRef}
+                    aria-label="New category"
                     onClick={onAdd}
                     sx={{
                         display: 'flex',
