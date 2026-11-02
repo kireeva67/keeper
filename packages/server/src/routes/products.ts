@@ -8,6 +8,7 @@ import { isSafeUrl } from "../utils/isSafeUrl";
 import { Prisma } from "../../generated/prisma";
 import { ValidationError } from "../error/ValidationError";
 import { logger } from "../utils/logger";
+import { FieldValidator } from "../utils/FieldValidator";
 
 export const productsRouter = Router();
 
@@ -33,6 +34,7 @@ productsRouter.post(`/`, requireAuth, addProductLimiter, async (req, res) => {
     try {
         const user = (req as any).user;
         const body: TTableProductData = req.body;
+        FieldValidator.assertProductFields(body);
         if (!isSafeUrl(body.url)) {
             return res.status(400).json({ message: 'Invalid URL.' });
         }
@@ -78,6 +80,7 @@ productsRouter.put(`/:id`, requireAuth, async (req, res) => {
             return res.status(400).json({ message: 'Invalid product ID' });
         }
         const body: TTableProductData = req.body;
+        FieldValidator.assertProductFields(body);
         const product = await prismaController.updateProduct(productId, user.email, body);
         res.json(product);
     } catch (error) {

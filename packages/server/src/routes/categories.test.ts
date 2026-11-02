@@ -46,6 +46,15 @@ describe('POST /api/categories', () => {
             .send({ name: 'test', email: mockedUser.email });
         expect(res.body).toEqual({ name: 'test', email: mockedUser.email });
     });
+
+    it('returns 400 if the name is too long, before any lookup', async () => {
+        const res = await request(app).post('/api/categories')
+            .send({ name: 'c'.repeat(25), color: '#c62828' });
+        expect(res.status).toBe(400);
+        expect(res.body).toEqual({ message: 'Category name must be at most 24 characters.' });
+        expect(prismaController.findCategoryByName).not.toHaveBeenCalled();
+        expect(prismaController.createCategory).not.toHaveBeenCalled();
+    });
 })
 
 describe('DELETE /api/categories/:id', () => {

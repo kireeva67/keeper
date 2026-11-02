@@ -45,7 +45,7 @@ describe('POST /api/products', () => {
     it('returns 400 if URL is unsafe', async () => {
         vi.mocked(isSafeUrl).mockReturnValueOnce(false);
         const res = await request(app).post('/api/products')
-            .send({ url: "http://localhost", email: mockedUser.email });
+            .send({ title: 'Lamp', url: "http://localhost", email: mockedUser.email });
         expect(res.status).toBe(400);
         expect(res.body).toEqual({ message: 'Invalid URL.' });
     });
@@ -54,7 +54,7 @@ describe('POST /api/products', () => {
         vi.mocked(isSafeUrl).mockReturnValueOnce(true);
         vi.mocked(prismaController.findProductByUrl).mockResolvedValueOnce({ email: mockedUser.email, url: "http://test" } as any);
         const res = await request(app).post('/api/products')
-            .send({ url: "http://test", email: mockedUser.email });
+            .send({ title: 'Lamp', url: "http://test", email: mockedUser.email });
         expect(res.status).toBe(409);
         expect(res.body).toEqual({ message: 'This URL is already in your collection.' });
     });
@@ -64,7 +64,7 @@ describe('POST /api/products', () => {
         vi.mocked(prismaController.findProductByUrl).mockResolvedValueOnce(undefined as any);
         vi.mocked(prismaController.createProduct).mockResolvedValueOnce({ url: "http://test", email: mockedUser.email } as any);
         const res = await request(app).post('/api/products')
-            .send({ url: "http://test", email: mockedUser.email });
+            .send({ title: 'Lamp', url: "http://test", email: mockedUser.email });
         expect(res.body).toEqual({ url: "http://test", email: mockedUser.email });
     })
 
@@ -73,9 +73,18 @@ describe('POST /api/products', () => {
         vi.mocked(prismaController.findProductByUrl).mockResolvedValueOnce(undefined as any);
         vi.mocked(prismaController.createProduct).mockRejectedValueOnce(new ValidationError('Category not found.'));
         const res = await request(app).post('/api/products')
-            .send({ url: "http://test", categoryId: 999 });
+            .send({ title: 'Lamp', url: "http://test", categoryId: 999 });
         expect(res.status).toBe(400);
         expect(res.body).toEqual({ message: 'Category not found.' });
+    });
+
+    it('returns 400 if the title is too long, before any lookup', async () => {
+        const res = await request(app).post('/api/products')
+            .send({ title: 'a'.repeat(121), url: "http://test" });
+        expect(res.status).toBe(400);
+        expect(res.body).toEqual({ message: 'Title must be at most 120 characters.' });
+        expect(isSafeUrl).not.toHaveBeenCalled();
+        expect(prismaController.createProduct).not.toHaveBeenCalled();
     });
 })
 
@@ -107,7 +116,7 @@ describe('PUT /api/products/:id', () => {
             new Prisma.PrismaClientKnownRequestError('Unique constraint failed', { code: 'P2002', clientVersion: '5' })
         );
         const res = await request(app).put('/api/products/11')
-            .send({ url: "http://test", email: mockedUser.email })
+            .send({ title: 'Lamp', url: "http://test", email: mockedUser.email })
         expect(res.status).toBe(409);
         expect(res.body).toEqual({ message: 'Another product already uses this URL.' });
     });
@@ -115,7 +124,23 @@ describe('PUT /api/products/:id', () => {
     it('returns updated product on success', async () => {
         vi.mocked(prismaController.updateProduct).mockResolvedValueOnce({ url: "http://test", email: mockedUser.email } as any);
         const res = await request(app).put('/api/products/11')
-            .send({ url: "http://test", email: mockedUser.email })
+            .send({ title: 'Lamp', url: "http://test", email: mockedUser.email })
         expect(res.body).toEqual({ url: "http://test", email: mockedUser.email });
     })
+
+    it('returns 400 if the description is too long', async () => {
+        const res = await request(app).put('/api/products/11')
+            .send({ title: 'Lamp', description: 'b'.repeat(501), categoryId: 1 });
+        expect(res.status).toBe(400);
+        expect(res.body).toEqual({ message: 'Description must be at most 500 characters.' });
+        expect(prismaController.updateProduct).not.toHaveBeenCalled();
+    });
+
+    it('returns 400 if the title is blank', async () => {
+        const res = await request(app).put('/api/products/11')
+            .send({ title: '  ', categoryId: 1 });
+        expect(res.status).toBe(400);
+        expect(res.body).toEqual({ message: 'Title is required.' });
+        expect(prismaController.updateProduct).not.toHaveBeenCalled();
+    });
 })
