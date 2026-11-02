@@ -76,7 +76,7 @@ export default function NewCategoryView({ onBack, onCreated }: Props) {
             <Box
                 role="group"
                 aria-label="Color"
-                sx={{ display: 'grid', gridTemplateColumns: 'repeat(6, 36px)', justifyContent: 'space-between', rowGap: 1.5, mt: 1 }}
+                sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}
             >
                 {PRESET_COLORS.map(c => {
                     const selected = color === c.value;
