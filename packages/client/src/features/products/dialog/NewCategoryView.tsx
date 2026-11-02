@@ -76,7 +76,8 @@ export default function NewCategoryView({ onBack, onCreated }: Props) {
             <Box
                 role="group"
                 aria-label="Color"
-                sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}
+                // As many 36px columns as fit (at least 8px apart), spread to the field's full width.
+                sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, 36px)', justifyContent: 'space-between', columnGap: 1, rowGap: 1.5, mt: 1 }}
             >
                 {PRESET_COLORS.map(c => {
                     const selected = color === c.value;
@@ -111,7 +112,7 @@ export default function NewCategoryView({ onBack, onCreated }: Props) {
                     );
                 })}
             </Box>
-            <DialogActions sx={{ px: 0, pt: 3 }}>
+            <DialogActions sx={{ px: 0, pt: 4 }}>
                 <Button onClick={onBack} disabled={submitting}>Cancel</Button>
                 <Button type="submit" variant="contained" disabled={submitting}>Add</Button>
             </DialogActions>
