@@ -24,12 +24,12 @@ test.describe('field limits', () => {
         await expect(dialog.getByText('500/500')).toBeVisible();
         await dialog.getByLabel('URL').fill(app.productUrl('long-fields'));
 
-        await dialog.locator('button:has(svg[data-testid="AddIcon"])').click();
-        const categoryDialog = page.getByRole('dialog', { name: 'New category' });
-        await categoryDialog.getByLabel('Name').fill('Kitchen and dining stuff and more');
-        await expect(categoryDialog.getByLabel('Name')).toHaveValue('Kitchen and dining stuff');
-        await categoryDialog.getByRole('button', { name: 'Create' }).click();
-        await expect(categoryDialog).toBeHidden();
+        await dialog.getByRole('button', { name: 'New category' }).click();
+        const categoryView = page.getByRole('dialog', { name: 'New category' });
+        await categoryView.getByLabel('Name').fill('Kitchen and dining stuff and more');
+        await expect(categoryView.getByLabel('Name')).toHaveValue('Kitchen and dining stuff');
+        await categoryView.getByRole('button', { name: 'Add', exact: true }).click();
+        await expect(categoryView).toBeHidden();
         await dialog.getByRole('button', { name: 'Create' }).click();
         await expect(dialog).toBeHidden();
 
