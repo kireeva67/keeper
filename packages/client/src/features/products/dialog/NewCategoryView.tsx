@@ -111,7 +111,7 @@ export default function NewCategoryView({ onBack, onCreated }: Props) {
                     );
                 })}
             </Box>
-            <DialogActions sx={{ px: 0, pt: 2 }}>
+            <DialogActions sx={{ px: 0, pt: 3 }}>
                 <Button onClick={onBack} disabled={submitting}>Cancel</Button>
                 <Button type="submit" variant="contained" disabled={submitting}>Add</Button>
             </DialogActions>
