@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Typography } from "@mui/material";
 import type { Category } from "../../../shared/types/CategoryType";
 import { addCategory } from "../api/addCategory";
+import { FieldLimits } from "../../../shared/utils/FieldLimits";
 
 const PRESET_COLORS = [
     '#c62828',
@@ -64,8 +65,8 @@ export default function NewCategoryDialog({ open, onClose, onCreated }: Props) {
                         fullWidth
                         required
                         autoFocus
-                        slotProps={{ htmlInput: { maxLength: 10 } }}
-                        helperText={error ?? `${name.length}/10`}
+                        slotProps={{ htmlInput: { maxLength: FieldLimits.categoryNameMaxLength } }}
+                        helperText={error ?? `${name.length}/${FieldLimits.categoryNameMaxLength}`}
                         error={Boolean(error)}
                     />
                     <Box>

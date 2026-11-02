@@ -10,8 +10,10 @@ interface UseProductFormReturn {
     values: Product;
     submitting: boolean;
     urlError: string | null;
+    titleError: string | null;
     setField: <K extends keyof Product>(key: K, value: Product[K]) => void;
     setUrlError: (val: string | null) => void;
+    setTitleError: (val: string | null) => void;
     handleSubmit: (event: React.FormEvent<HTMLFormElement>) => Promise<void>;
 }
 
@@ -19,6 +21,7 @@ export function useProductForm({ initialData, onSuccess }: FormProps): UseProduc
     const [values, setValues] = useState<Product>(initialData || { title: "", url: "", description: "", id: 0, category: { id: CATEGORY_ID[CategoryName.OTHER], name: CategoryName.OTHER, color: "#797979" } });
     const [submitting, setSubmitting] = useState(false);
     const [urlError, setUrlError] = useState<string | null>(null);
+    const [titleError, setTitleError] = useState<string | null>(null);
 
     function setField<K extends keyof Product>(key: K, value: Product[K]) {
         setValues((v) => ({ ...v, [key]: value }));
@@ -54,8 +57,13 @@ export function useProductForm({ initialData, onSuccess }: FormProps): UseProduc
 
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
+        // `required` accepts a title of only spaces; the server would reject it.
+        if (!values.title.trim()) {
+            setTitleError("Title is required");
+            return;
+        }
         await submit();
     }
 
-    return { values, setField, submitting, handleSubmit, urlError, setUrlError };
+    return { values, setField, submitting, handleSubmit, urlError, setUrlError, titleError, setTitleError };
 }

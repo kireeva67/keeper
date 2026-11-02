@@ -98,7 +98,9 @@ export function ProductCard({ product }: CardProps) {
                     }}
                 />
                 {description && (
-                    <Typography sx={{ pl: 0.5, mt: '4px' }} variant="body2" color="text.secondary">
+                    <Typography variant="body2" color="text.secondary"
+                        sx={{ pl: 0.5, mt: '4px', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden', overflowWrap: 'anywhere' }}
+                    >
                         {description}
                     </Typography>
                 )}

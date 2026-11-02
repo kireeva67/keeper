@@ -5,6 +5,7 @@ import { TTableCategoryData } from "../types/Types";
 import { ValidationError } from "../error/ValidationError";
 import { addCategoryLimiter } from "../middleware/CategoriesLimiter";
 import { logger } from "../utils/logger";
+import { FieldValidator } from "../utils/FieldValidator";
 
 export const categoriesRouter = Router();
 
@@ -24,6 +25,7 @@ categoriesRouter.post(`/`, requireAuth, addCategoryLimiter, async (req, res) => 
     try {
         const user = (req as any).user;
         const body: TTableCategoryData = req.body;
+        FieldValidator.assertCategoryFields(body);
         const existingCategory = await prismaController.findCategoryByName(body.name, user.email);
         if (existingCategory) {
             return res.status(409).json({
@@ -33,6 +35,9 @@ categoriesRouter.post(`/`, requireAuth, addCategoryLimiter, async (req, res) => 
         const category = await prismaController.createCategory(user.email, body);
         res.json(category);
     } catch (error) {
+        if (error instanceof ValidationError) {
+            return res.status(400).json({ message: error.message });
+        }
         logger.error({ err: error }, 'Failed to create category');
         res.status(500).json({ message: 'Internal server error' });
     }

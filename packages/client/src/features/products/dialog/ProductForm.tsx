@@ -6,6 +6,7 @@ import CategoryPicker from "../categories/CategoryPicker";
 import NewCategoryDialog from "./NewCategoryDialog";
 import type { Category } from "../../../shared/types/CategoryType";
 import { useProducts } from "../api/useProducts";
+import { FieldLimits } from "../../../shared/utils/FieldLimits";
 
 export type FormProps = {
   initialData?: Product; // If exists === edit mode
@@ -15,7 +16,7 @@ export type FormProps = {
 
 export function ProductForm({ initialData, onCancel, onSuccess }: FormProps) {
   const isEdit = Boolean(initialData);
-  const { values, setField, submitting, handleSubmit, urlError, setUrlError } = useProductForm({ initialData, onSuccess });
+  const { values, setField, submitting, handleSubmit, urlError, setUrlError, titleError, setTitleError } = useProductForm({ initialData, onSuccess });
   const { categories, addCategory } = useProducts();
   const [addCategoryOpen, setAddCategoryOpen] = useState(false);
 
@@ -28,12 +29,13 @@ export function ProductForm({ initialData, onCancel, onSuccess }: FormProps) {
     <form onSubmit={handleSubmit}>
       <TextField
         value={values.title}
-        onChange={(e) => setField("title", e.target.value)}
-        slotProps={{ input: { name: "title" }, htmlInput: { maxLength: 20 } }}
+        onChange={(e) => { setField("title", e.target.value); if (titleError) setTitleError(null) }}
+        slotProps={{ input: { name: "title" }, htmlInput: { maxLength: FieldLimits.titleMaxLength } }}
         label="Title"
         fullWidth
         required sx={{ mt: 2 }}
-        helperText={`${values.title.length}/20`}
+        error={Boolean(titleError)}
+        helperText={titleError ?? `${values.title.length}/${FieldLimits.titleMaxLength}`}
       />
       {!isEdit &&
         <TextField
@@ -51,13 +53,13 @@ export function ProductForm({ initialData, onCancel, onSuccess }: FormProps) {
       <TextField
         value={values.description}
         onChange={(e) => setField("description", e.target.value)}
-        slotProps={{ input: { name: "description" }, htmlInput: { maxLength: 100 } }}
+        slotProps={{ input: { name: "description" }, htmlInput: { maxLength: FieldLimits.descriptionMaxLength } }}
         label="Description"
         fullWidth
         multiline
         rows={3}
         sx={{ mt: 2 }}
-        helperText={`${values.description?.length}/100`}
+        helperText={`${values.description?.length}/${FieldLimits.descriptionMaxLength}`}
       />
 
       <CategoryPicker
