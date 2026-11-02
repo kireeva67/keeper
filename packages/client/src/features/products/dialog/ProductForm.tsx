@@ -12,13 +12,15 @@ export type FormProps = {
   initialData?: Product; // If exists === edit mode
   onCancel?: () => void;
   onSuccess: (updatedProduct?: Product) => void;
+  // Lets the dialog show "New category" as its title while the category view is open.
+  onAddingCategoryChange?: (adding: boolean) => void;
 };
 
-export function ProductForm({ initialData, onCancel, onSuccess }: FormProps) {
+export function ProductForm({ initialData, onCancel, onSuccess, onAddingCategoryChange }: FormProps) {
   const isEdit = Boolean(initialData);
   const { values, setField, submitting, handleSubmit, urlError, setUrlError, titleError, setTitleError, formError } = useProductForm({ initialData, onSuccess });
   const { categories, addCategory } = useProducts();
-  const [addingCategory, setAddingCategory] = useState(false);
+  const [addingCategory, setAddingCategoryState] = useState(false);
   const addCategoryButtonRef = useRef<HTMLButtonElement>(null);
   const wasAddingCategory = useRef(false);
 
@@ -30,6 +32,11 @@ export function ProductForm({ initialData, onCancel, onSuccess }: FormProps) {
     }
     wasAddingCategory.current = addingCategory;
   }, [addingCategory]);
+
+  const setAddingCategory = (adding: boolean) => {
+    setAddingCategoryState(adding);
+    onAddingCategoryChange?.(adding);
+  };
 
   const handleCategoryCreated = (category: Category) => {
     addCategory(category);

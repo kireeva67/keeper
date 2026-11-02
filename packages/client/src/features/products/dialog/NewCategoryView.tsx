@@ -26,6 +26,7 @@ type Props = {
 };
 
 // Shown in place of the product form, inside the same dialog, so two dialogs never stack.
+// The dialog title changes to "New category" while it is shown (see ProductForm).
 export default function NewCategoryView({ onBack, onCreated }: Props) {
     const [name, setName] = useState("");
     const [color, setColor] = useState(PRESET_COLORS[0].value);
@@ -59,7 +60,6 @@ export default function NewCategoryView({ onBack, onCreated }: Props) {
 
     return (
         <form onSubmit={handleSubmit} onKeyDown={handleKeyDown} noValidate>
-            <Typography variant="h6" component="h3" fontWeight={600} sx={{ mt: 1 }}>New category</Typography>
             <TextField
                 value={name}
                 onChange={(e) => { setName(e.target.value); if (error) setError(null); }}

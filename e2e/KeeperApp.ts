@@ -65,9 +65,10 @@ export class KeeperApp {
         }
         if (options.newCategory) {
             await dialog.getByRole('button', { name: 'New category' }).click();
-            await dialog.getByLabel('Name').fill(options.newCategory);
-            await dialog.getByRole('button', { name: 'Add', exact: true }).click();
-            await expect(dialog.getByRole('heading', { name: 'New category' })).toBeHidden();
+            const categoryView = this.page.getByRole('dialog', { name: 'New category' });
+            await categoryView.getByLabel('Name').fill(options.newCategory);
+            await categoryView.getByRole('button', { name: 'Add', exact: true }).click();
+            await expect(categoryView).toBeHidden();
         }
         await dialog.getByRole('button', { name: 'Create' }).click();
         await expect(dialog).toBeHidden();

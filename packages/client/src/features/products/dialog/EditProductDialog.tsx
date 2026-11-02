@@ -12,6 +12,7 @@ export default function EditProductDialog() {
     const navigate = useNavigate();
     const [product, setProduct] = useState<Product | null>(null);
     const [loading, setLoading] = useState(true);
+    const [addingCategory, setAddingCategory] = useState(false);
     const { updateProductInState } = useProducts();
     const { showError } = useSnackbar();
     const theme = useTheme();
@@ -44,7 +45,7 @@ export default function EditProductDialog() {
 
     return (
         <Dialog open onClose={handleClose} fullWidth maxWidth="sm" fullScreen={isMobile}>
-            <DialogTitle sx={{ display: 'flex', justifyContent: 'center' }}>Edit Product</DialogTitle>
+            <DialogTitle sx={{ display: 'flex', justifyContent: 'center' }}>{addingCategory ? "New category" : "Edit Product"}</DialogTitle>
             <DialogContent sx={isMobile ? {
                 display: 'flex',
                 flexDirection: 'column',
@@ -59,6 +60,7 @@ export default function EditProductDialog() {
                         initialData={product || undefined}
                         onCancel={handleClose}
                         onSuccess={handleSuccess}
+                        onAddingCategoryChange={setAddingCategory}
                     />
                 )}
             </DialogContent>

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Dialog, DialogTitle, DialogContent, useTheme, useMediaQuery } from "@mui/material";
 import { useNavigate, useLocation } from "react-router-dom";
 import { PRODUCTS_ROUTE } from "../../auth/config/authURLS";
@@ -15,6 +16,8 @@ export default function NewProductDialog({ fullPage = false }: { fullPage?: bool
   const state = location.state as LocationState | null;
   const isModal = Boolean(state?.background) && !fullPage;
   const { addProductToState } = useProducts();
+  const [addingCategory, setAddingCategory] = useState(false);
+  const title = addingCategory ? "New category" : "New product";
 
   const handleClose = () => {
     const state = location.state as { background?: Location } | undefined;
@@ -37,12 +40,13 @@ export default function NewProductDialog({ fullPage = false }: { fullPage?: bool
     <ProductForm
       onCancel={handleClose}
       onSuccess={handleSuccess}
+      onAddingCategoryChange={setAddingCategory}
     />
   );
 
   return isModal ? (
     <Dialog open onClose={handleClose} fullWidth maxWidth="sm" fullScreen={isMobile}>
-      <DialogTitle sx={{ display: 'flex', justifyContent: 'center' }}>New product</DialogTitle>
+      <DialogTitle sx={{ display: 'flex', justifyContent: 'center' }}>{title}</DialogTitle>
       <DialogContent sx={isMobile ? {
         display: 'flex',
         flexDirection: 'column',
@@ -51,7 +55,7 @@ export default function NewProductDialog({ fullPage = false }: { fullPage?: bool
     </Dialog>
   ) : (
     <div style={{ maxWidth: 640, margin: "64px auto", padding: 16 }}>
-      <h1>New product</h1>
+      <h1>{title}</h1>
       {content}
     </div>
   );

@@ -25,10 +25,11 @@ test.describe('field limits', () => {
         await dialog.getByLabel('URL').fill(app.productUrl('long-fields'));
 
         await dialog.getByRole('button', { name: 'New category' }).click();
-        await dialog.getByLabel('Name').fill('Kitchen and dining stuff and more');
-        await expect(dialog.getByLabel('Name')).toHaveValue('Kitchen and dining stuff');
-        await dialog.getByRole('button', { name: 'Add', exact: true }).click();
-        await expect(dialog.getByRole('heading', { name: 'New category' })).toBeHidden();
+        const categoryView = page.getByRole('dialog', { name: 'New category' });
+        await categoryView.getByLabel('Name').fill('Kitchen and dining stuff and more');
+        await expect(categoryView.getByLabel('Name')).toHaveValue('Kitchen and dining stuff');
+        await categoryView.getByRole('button', { name: 'Add', exact: true }).click();
+        await expect(categoryView).toBeHidden();
         await dialog.getByRole('button', { name: 'Create' }).click();
         await expect(dialog).toBeHidden();
 
