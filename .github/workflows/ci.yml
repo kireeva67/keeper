@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+# A newer push to the same PR cancels its run still in progress.
+# Runs on main are never cancelled, so every merged commit gets a result.
+concurrency:
+  group: ci-${{ github.event_name == 'pull_request' && github.ref || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Lint, types, unit tests, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          # Prisma 7.10 needs Node ^20.19, ^22.12 or >=24.
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx -w @repo/server prisma generate
+      - run: npm -w @repo/client run lint
+      - run: npx -w @repo/client tsc -b
+      - run: npx -w @repo/server tsc --noEmit
+      - run: npx tsc -p e2e
+      - run: npx -w @repo/client vitest run
+      - run: npx -w @repo/server vitest run
+      - run: npm run build
+
+  e2e:
+    name: End-to-end tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx -w @repo/server prisma generate
+      - run: npx playwright install --with-deps chromium
+      # Tests tagged @network fetch real sites, so they stay local-only.
+      - run: npx playwright test --grep-invert @network
+      - if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-test-results
+          path: test-results/
+          retention-days: 7
