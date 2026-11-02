@@ -6,6 +6,7 @@ import { getProducts } from '../api/getProducts';
 import { getCategoriesForUser } from '../api/getCategories';
 import { http } from '../../../shared/api/http';
 import { useSearchParams } from 'react-router-dom';
+import { useSnackbar } from '../../../shared/snackbar/useSnackbar';
 
 export const ProductProvider = ({ children }: { children: React.ReactNode }) => {
     const [products, setProducts] = useState<Product[]>([]);
@@ -13,6 +14,8 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
     const [hasMore, setHasMore] = useState(true);
     const [loading, setLoading] = useState(false);
     const [total, setTotal] = useState(0);
+    const [loadError, setLoadError] = useState(false);
+    const { showError } = useSnackbar();
     const loadingRef = useRef(false);
     const [searchParams, setSearchParams] = useSearchParams();
     const [categoriesIds, setCategoriesIds] = useState<number[]>(() =>
@@ -21,8 +24,9 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
     const [categories, setCategories] = useState<Category[]>([]);
 
     useEffect(() => {
-        getCategoriesForUser().then(setCategories).catch(() => {});
-    }, []);
+        getCategoriesForUser().then(setCategories)
+            .catch(() => showError("Couldn't load your categories. Reload the page to try again."));
+    }, [showError]);
 
     const addCategory = (category: Category) => {
         setCategories(prev => [...prev, { ...category, _count: { products: 0 } }]);
@@ -38,7 +42,9 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
 
     const loadMore = useCallback(async () => {
         if (loadingRef.current || !hasMore) return;
-        await fetchProducts(categoriesIds, cursor, true);
+        // Without a cursor no page has loaded yet (the first load failed), so replace
+        // the list instead of appending; this avoids duplicating items added since.
+        await fetchProducts(categoriesIds, cursor, cursor !== null);
     }, [cursor, hasMore, categoriesIds]);
 
     useEffect(() => {
@@ -53,19 +59,29 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
     const fetchProducts = async (ids: number[], cursor: number | null, append: boolean) => {
         loadingRef.current = true;
         setLoading(true);
+        setLoadError(false);
         try {
             const { products, nextCursor, total } = await getProducts(ids, cursor);
             setProducts(prev => append ? [...prev, ...products] : products);
             setTotal(total);
             setCursor(nextCursor);
             setHasMore(nextCursor !== null);
+            // An earlier request may have failed after this one started.
+            setLoadError(false);
         } catch {
-            // handled globally
+            // A failed first page or filter change leaves nothing stale on screen,
+            // so the list can show its Retry state. A failed "Load More" keeps what is loaded.
+            if (!append) setProducts([]);
+            setLoadError(true);
         } finally {
             setLoading(false);
             loadingRef.current = false;
         }
     }
+
+    const retry = useCallback(() => {
+        reload(categoriesIds);
+    }, [reload, categoriesIds]);
 
     const setFilter = (ids: number[]) => {
         setSearchParams(ids.length ? { category: ids.map(String) } : {});
@@ -120,6 +136,8 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
             loading,
             hasMore,
             loadMore,
+            loadError,
+            retry,
             total,
             categoriesIds,
             updateProductInState,

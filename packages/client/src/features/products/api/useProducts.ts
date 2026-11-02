@@ -9,6 +9,8 @@ type ProductContextType = {
     total: number;
     categoriesIds: number[];
     loadMore: () => void;
+    loadError: boolean;
+    retry: () => void;
     updateProductInState: (product: Product) => void;
     deleteProductFromState: (id: number) => void;
     addProductToState: (product: Product) => void;

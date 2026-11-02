@@ -14,6 +14,11 @@ const mockProduct = {
 };
 
 const mockdeleteProductFromState = vi.fn();
+const mockShowError = vi.fn();
+
+vi.mock('../../../shared/snackbar/useSnackbar', () => ({
+    useSnackbar: () => ({ showError: mockShowError }),
+}));
 
 vi.mock('../api/useProducts', () => ({
     useProducts: () => ({ deleteProductFromState: mockdeleteProductFromState }),
@@ -48,5 +53,14 @@ describe('ProductCard', () => {
         await userEvent.click(screen.getByText('Delete'));
         expect(deleteProduct).toHaveBeenCalledWith(1);
         expect(mockdeleteProductFromState).toHaveBeenCalledWith(1);
+    });
+
+    it('shows an error and keeps the card when delete fails', async () => {
+        vi.mocked(deleteProduct).mockRejectedValueOnce(new Error('network'));
+        render(<MemoryRouter><ProductCard product={mockProduct} /></MemoryRouter>);
+        await userEvent.click(screen.getByRole('button', { name: /more options/i }));
+        await userEvent.click(screen.getByText('Delete'));
+        expect(mockShowError).toHaveBeenCalledWith("Couldn't delete this item. Please try again.");
+        expect(mockdeleteProductFromState).not.toHaveBeenCalled();
     });
 });  

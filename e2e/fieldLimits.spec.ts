@@ -69,6 +69,20 @@ test.describe('field limits', () => {
         await expect(app.card('Keep me')).toBeVisible();
     });
 
+    test('an empty form shows required errors under the fields, not browser bubbles', async ({ page }) => {
+        await page.getByRole('button', { name: 'add product' }).click();
+        const dialog = page.getByRole('dialog', { name: 'New product' });
+        await dialog.getByRole('button', { name: 'Create' }).click();
+
+        await expect(dialog.getByText('Title is required')).toBeVisible();
+        await expect(dialog.getByText('URL is required')).toBeVisible();
+        // The browser's own validation would leave the input marked invalid; noValidate skips it.
+        expect(await dialog.getByLabel('Title').evaluate(el => (el.closest('form') as HTMLFormElement).noValidate)).toBe(true);
+
+        await dialog.getByLabel('URL').fill(app.productUrl('now-valid'));
+        await expect(dialog.getByText('URL is required')).toBeHidden();
+    });
+
     test('the API rejects over-limit fields sent past the form', async ({ page }) => {
         // page.request shares the signed-in session cookie with the page.
         const api = 'http://localhost:3201/api';

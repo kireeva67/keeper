@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button, DialogActions, TextField } from "@mui/material";
+import { Alert, Button, DialogActions, TextField } from "@mui/material";
 import type { Product } from "../../../shared/types/ProductType";
 import { useProductForm } from "../api/useProductForm";
 import CategoryPicker from "../categories/CategoryPicker";
@@ -16,7 +16,7 @@ export type FormProps = {
 
 export function ProductForm({ initialData, onCancel, onSuccess }: FormProps) {
   const isEdit = Boolean(initialData);
-  const { values, setField, submitting, handleSubmit, urlError, setUrlError, titleError, setTitleError } = useProductForm({ initialData, onSuccess });
+  const { values, setField, submitting, handleSubmit, urlError, setUrlError, titleError, setTitleError, formError } = useProductForm({ initialData, onSuccess });
   const { categories, addCategory } = useProducts();
   const [addCategoryOpen, setAddCategoryOpen] = useState(false);
 
@@ -26,7 +26,10 @@ export function ProductForm({ initialData, onCancel, onSuccess }: FormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    // noValidate: required fields are checked in useProductForm and shown as MUI helper
+    // text, instead of the browser's own "Please fill in this field" bubble.
+    <form onSubmit={handleSubmit} noValidate>
+      {formError && <Alert severity="error" sx={{ mt: 2 }}>{formError}</Alert>}
       <TextField
         value={values.title}
         onChange={(e) => { setField("title", e.target.value); if (titleError) setTitleError(null) }}
