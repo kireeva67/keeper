@@ -1,11 +1,10 @@
 import { useState } from "react";
-import { Box, Button, Chip, DialogActions, IconButton, TextField, Typography } from "@mui/material";
+import { Box, Button, DialogActions, IconButton, TextField, Typography } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CheckIcon from "@mui/icons-material/Check";
 import type { Category } from "../../../shared/types/CategoryType";
 import { addCategory } from "../api/addCategory";
 import { FieldLimits } from "../../../shared/utils/FieldLimits";
-import { categoryChipSx } from "../categories/categoryChipSx";
 
 const PRESET_COLORS = [
     { name: 'Red', value: '#c62828' },
@@ -83,7 +82,7 @@ export default function NewCategoryView({ onBack, onCreated }: Props) {
             <Box
                 role="group"
                 aria-label="Color"
-                sx={{ display: 'grid', gridTemplateColumns: 'repeat(6, 28px)', gap: 1.5, mt: 1, p: '5px' }}
+                sx={{ display: 'grid', gridTemplateColumns: 'repeat(6, 36px)', gap: 1.5, mt: 1 }}
             >
                 {PRESET_COLORS.map(c => {
                     const selected = color === c.value;
@@ -96,8 +95,8 @@ export default function NewCategoryView({ onBack, onCreated }: Props) {
                             aria-pressed={selected}
                             onClick={() => setColor(c.value)}
                             sx={{
-                                width: 28,
-                                height: 28,
+                                width: 36,
+                                height: 36,
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
@@ -106,24 +105,17 @@ export default function NewCategoryView({ onBack, onCreated }: Props) {
                                 color: 'common.white',
                                 border: 'none',
                                 cursor: 'pointer',
-                                outline: selected ? `3px solid ${c.value}` : '3px solid transparent',
-                                outlineOffset: '2px',
+                                // The selection ring is drawn inside the circle (colour ring, white
+                                // gap, fill), so every swatch keeps the same size and stays aligned.
+                                boxShadow: selected ? `inset 0 0 0 3px ${c.value}, inset 0 0 0 5px #fff` : 'none',
                                 p: 0,
-                                '&:focus-visible': { outline: '3px solid', outlineColor: 'text.primary' },
+                                '&:focus-visible': { outline: '2px solid', outlineColor: 'text.primary', outlineOffset: '2px' },
                             }}
                         >
                             {selected && <CheckIcon sx={{ fontSize: 18 }} />}
                         </Box>
                     );
                 })}
-            </Box>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 2 }}>
-                <Typography variant="body2" color="text.secondary">Preview</Typography>
-                <Chip
-                    label={name.trim().toLowerCase() || 'category'}
-                    size="small"
-                    sx={{ ...categoryChipSx(color), fontWeight: 500 }}
-                />
             </Box>
             <DialogActions sx={{ px: 0, pt: 2 }}>
                 <Button onClick={onBack} disabled={submitting}>Cancel</Button>

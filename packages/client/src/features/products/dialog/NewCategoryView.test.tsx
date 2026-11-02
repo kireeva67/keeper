@@ -43,7 +43,6 @@ describe('NewCategoryView', () => {
         expect(screen.getByRole('button', { name: 'Red' })).toHaveAttribute('aria-pressed', 'false');
 
         await userEvent.type(screen.getByLabelText(/name/i), 'Books');
-        expect(screen.getByText('books')).toBeInTheDocument();
         await userEvent.click(screen.getByRole('button', { name: 'Add' }));
         expect(addCategory).toHaveBeenCalledWith({ name: 'Books', color: '#1565c0' });
         expect(onCreated).toHaveBeenCalledWith(created);
