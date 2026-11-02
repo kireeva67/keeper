@@ -22,6 +22,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useProducts } from "../api/useProducts";
 import { alpha } from "@mui/material/styles";
 import { useState } from "react";
+import { useSnackbar } from "../../../shared/snackbar/useSnackbar";
 
 type CardProps = {
     product: Product;
@@ -36,6 +37,7 @@ export function ProductCard({ product }: CardProps) {
     const navigate = useNavigate();
     const location = useLocation();
     const { deleteProductFromState } = useProducts();
+    const { showError } = useSnackbar();
 
     const handleEdit = () => {
         closeMenu();
@@ -44,9 +46,13 @@ export function ProductCard({ product }: CardProps) {
 
     const handleDelete = async () => {
         closeMenu();
-        const success = await deleteProduct(id);
-        if (success) {
-            deleteProductFromState(id);
+        try {
+            const success = await deleteProduct(id);
+            if (success) {
+                deleteProductFromState(id);
+            }
+        } catch {
+            showError("Couldn't delete this item. Please try again.");
         }
     };
 

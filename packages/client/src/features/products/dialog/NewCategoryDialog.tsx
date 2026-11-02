@@ -41,6 +41,10 @@ export default function NewCategoryDialog({ open, onClose, onCreated }: Props) {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         e.stopPropagation();
+        if (!name.trim()) {
+            setError("Name is required");
+            return;
+        }
         setSubmitting(true);
         try {
             const created = await addCategory({ name, color });
@@ -56,7 +60,7 @@ export default function NewCategoryDialog({ open, onClose, onCreated }: Props) {
     return (
         <Dialog open={open} onClose={handleClose} fullWidth maxWidth="xs">
             <DialogTitle>New category</DialogTitle>
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} noValidate>
                 <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                     <TextField
                         value={name}
@@ -96,9 +100,7 @@ export default function NewCategoryDialog({ open, onClose, onCreated }: Props) {
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClose} disabled={submitting}>Cancel</Button>
-                    <Button type="submit" variant="contained" disabled={submitting || !name.trim()}
-                        sx={{ bgcolor: color, '&:hover': { bgcolor: color, filter: 'brightness(0.9)' } }}
-                    >
+                    <Button type="submit" variant="contained" disabled={submitting}>
                         Create
                     </Button>
                 </DialogActions>

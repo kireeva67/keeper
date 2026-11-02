@@ -10,6 +10,7 @@ import ConfirmDeletionDialog from "../components/ConfirmDeletionDialog";
 import { useProducts } from "../../products/api/useProducts";
 import { deleteUser } from "../../../shared/api/deleteUser";
 import { useAuth } from "../../auth/api/useAuth";
+import { useSnackbar } from "../../../shared/snackbar/useSnackbar";
 
 export default function SettingsPage() {
     const navigate = useNavigate();
@@ -18,21 +19,32 @@ export default function SettingsPage() {
     const pendingCategory = customCategories.find(c => c.id === pendingDeleteId);
     const [pendingAccount, setPendingAccount] = useState(false);
     const { setAuthenticated } = useAuth();
+    const { showError } = useSnackbar();
 
     const handleDelete = async () => {
         if (pendingDeleteId) {
-            await deleteCategory(pendingDeleteId);
-            reassignCategoryInState(pendingDeleteId, otherCategory()!);
-            setPendingDeleteId(null);
+            try {
+                await deleteCategory(pendingDeleteId);
+                reassignCategoryInState(pendingDeleteId, otherCategory()!);
+            } catch {
+                showError("Couldn't delete this category. Please try again.");
+            } finally {
+                setPendingDeleteId(null);
+            }
         }
     };
 
     const handleAccountDeletion = async () => {
         if (pendingAccount) {
-            const result = await deleteUser();
-            if (result) {
-                setAuthenticated(false);
-                navigate(LOGIN_ROUTE);
+            try {
+                const result = await deleteUser();
+                if (result) {
+                    setAuthenticated(false);
+                    navigate(LOGIN_ROUTE);
+                }
+            } catch {
+                setPendingAccount(false);
+                showError("Couldn't delete your account. Please try again.");
             }
         }
     }

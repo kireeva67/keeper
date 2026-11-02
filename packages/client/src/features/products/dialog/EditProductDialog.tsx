@@ -5,6 +5,7 @@ import { ProductForm } from "./ProductForm";
 import type { Product } from "../../../shared/types/ProductType";
 import { getProduct } from "../api/getProduct";
 import { useProducts } from "../api/useProducts";
+import { useSnackbar } from "../../../shared/snackbar/useSnackbar";
 
 export default function EditProductDialog() {
     const { id } = useParams();
@@ -12,6 +13,7 @@ export default function EditProductDialog() {
     const [product, setProduct] = useState<Product | null>(null);
     const [loading, setLoading] = useState(true);
     const { updateProductInState } = useProducts();
+    const { showError } = useSnackbar();
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -31,7 +33,10 @@ export default function EditProductDialog() {
                     setProduct(data);
                     setLoading(false);
                 })
-                .catch(() => handleClose());
+                .catch(() => {
+                    showError("Couldn't open this item. Please try again.");
+                    handleClose();
+                });
         }
     }, [id]);
 

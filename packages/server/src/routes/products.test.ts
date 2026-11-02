@@ -9,6 +9,8 @@ const mockedUser = { email: 'test@example.com', password: 'ValidPass1!' };
 
 vi.mock('../prisma/PrismaController', () => ({
     prismaController: {
+        getProductsForUser: vi.fn(),
+        countProductsForUser: vi.fn(),
         findProductByUrl: vi.fn(),
         createProduct: vi.fn(),
         deleteProduct: vi.fn(),
@@ -36,6 +38,30 @@ vi.mock('../middleware/ProductLimiter', () => ({
     addProductLimiter: vi.fn((_req: any, _res: any, next: () => void) => next()),
 }));
 
+
+describe('GET /api/products', () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+    });
+
+    it('asks for 40 products and returns a cursor when the page is full', async () => {
+        const page = Array.from({ length: 40 }, (_, i) => ({ id: 100 - i }));
+        vi.mocked(prismaController.getProductsForUser).mockResolvedValueOnce(page as any);
+        vi.mocked(prismaController.countProductsForUser).mockResolvedValueOnce(55);
+        const res = await request(app).get('/api/products');
+        expect(prismaController.getProductsForUser).toHaveBeenCalledWith(mockedUser.email, 40, null, []);
+        expect(res.body.nextCursor).toBe(61);
+        expect(res.body.total).toBe(55);
+    });
+
+    it('returns no cursor on the last, partly filled page', async () => {
+        vi.mocked(prismaController.getProductsForUser).mockResolvedValueOnce([{ id: 5 }, { id: 4 }] as any);
+        vi.mocked(prismaController.countProductsForUser).mockResolvedValueOnce(42);
+        const res = await request(app).get('/api/products?cursor=6');
+        expect(prismaController.getProductsForUser).toHaveBeenCalledWith(mockedUser.email, 40, 6, []);
+        expect(res.body.nextCursor).toBeNull();
+    });
+})
 
 describe('POST /api/products', () => {
     beforeEach(() => {

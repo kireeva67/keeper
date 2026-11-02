@@ -16,7 +16,7 @@ productsRouter.get(`/`, requireAuth, async (req, res) => {
     try {
         const user = (req as any).user;
         const query = req.query as unknown as TGetProductsQuery;
-        const limit = 10;
+        const limit = 40;
         const cursor = query.cursor ? parseInt(query.cursor as string) : null;
         const categoryIds = query.categoryIds ? query.categoryIds.split(',').map(Number).filter(Boolean) : [];
         const [products, total] = await Promise.all([
