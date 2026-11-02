@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { Box, Button, DialogActions, IconButton, TextField, Typography } from "@mui/material";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import { Box, Button, DialogActions, TextField, Typography } from "@mui/material";
 import CheckIcon from "@mui/icons-material/Check";
 import type { Category } from "../../../shared/types/CategoryType";
 import { addCategory } from "../api/addCategory";
@@ -60,12 +59,7 @@ export default function NewCategoryView({ onBack, onCreated }: Props) {
 
     return (
         <form onSubmit={handleSubmit} onKeyDown={handleKeyDown} noValidate>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
-                <IconButton onClick={onBack} aria-label="Back to product" edge="start" disabled={submitting}>
-                    <ArrowBackIcon />
-                </IconButton>
-                <Typography variant="h6" component="h3" fontWeight={600}>New category</Typography>
-            </Box>
+            <Typography variant="h6" component="h3" fontWeight={600} sx={{ mt: 1 }}>New category</Typography>
             <TextField
                 value={name}
                 onChange={(e) => { setName(e.target.value); if (error) setError(null); }}
@@ -82,7 +76,7 @@ export default function NewCategoryView({ onBack, onCreated }: Props) {
             <Box
                 role="group"
                 aria-label="Color"
-                sx={{ display: 'grid', gridTemplateColumns: 'repeat(6, 36px)', gap: 1.5, mt: 1 }}
+                sx={{ display: 'grid', gridTemplateColumns: 'repeat(6, 36px)', justifyContent: 'space-between', rowGap: 1.5, mt: 1 }}
             >
                 {PRESET_COLORS.map(c => {
                     const selected = color === c.value;
