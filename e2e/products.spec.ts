@@ -94,4 +94,12 @@ test.describe('products and categories', () => {
         await expect(app.card('Book item')).toBeVisible();
         await expect(app.card('Film item')).toBeVisible();
     });
+
+    test('a new account sees the empty state, and an empty filter names its category', async ({ page }) => {
+        await expect(page.getByText('Nothing saved yet')).toBeVisible();
+
+        await page.getByRole('button', { name: /^films/ }).click();
+
+        await expect(page.getByText('Nothing in films yet')).toBeVisible();
+    });
 });
