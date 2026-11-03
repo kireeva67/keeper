@@ -17,7 +17,7 @@ const product = { id: 1, title: 'Lamp', url: 'https://shop.example.invalid/lamp'
 function mockList(state: Record<string, unknown>) {
     vi.mocked(useProducts).mockReturnValue({
         products: [], hasMore: false, loading: false, loadError: false,
-        loadMore: vi.fn(), retry: vi.fn(), deleteProductFromState: vi.fn(),
+        loadMore: vi.fn(), retry: vi.fn(), deleteWithUndo: vi.fn(),
         categories: [{ id: 2, name: 'Books', color: '#000000' }, { id: 3, name: 'Films', color: '#000000' }],
         categoriesIds: [],
         ...state,

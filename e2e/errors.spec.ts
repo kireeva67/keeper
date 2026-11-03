@@ -54,8 +54,11 @@ test.describe('error handling', () => {
 
         await app.card('Delete fails').getByRole('button', { name: 'more options' }).click();
         await page.getByRole('menuitem', { name: 'Delete' }).click();
+        await expect(app.card('Delete fails')).toBeHidden();
+        await page.keyboard.press('Escape');
 
         await expect(page.getByRole('alert').filter({ hasText: "Couldn't delete this item." })).toBeVisible();
+        await expect(app.card('Delete fails')).toBeVisible();
         await page.reload();
         await expect(app.card('Delete fails')).toBeVisible();
     });

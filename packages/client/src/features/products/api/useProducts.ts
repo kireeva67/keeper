@@ -12,7 +12,7 @@ type ProductContextType = {
     loadError: boolean;
     retry: () => void;
     updateProductInState: (product: Product) => void;
-    deleteProductFromState: (id: number) => void;
+    deleteWithUndo: (product: Product) => void;
     addProductToState: (product: Product) => void;
     reassignCategoryInState: (fromCategoryId: number, toCategory: Category) => void;
     setFilter: (ids: number[]) => void;

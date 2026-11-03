@@ -7,6 +7,11 @@ import { getCategoriesForUser } from '../api/getCategories';
 import { http } from '../../../shared/api/http';
 import { useSearchParams } from 'react-router-dom';
 import { useSnackbar } from '../../../shared/snackbar/useSnackbar';
+import { deleteProduct } from '../api/deleteProduct';
+
+function matchesFilter(ids: number[], product: Product) {
+    return ids.length === 0 || ids.includes(product.category.id);
+}
 
 export const ProductProvider = ({ children }: { children: React.ReactNode }) => {
     const [products, setProducts] = useState<Product[]>([]);
@@ -15,13 +20,16 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
     const [loading, setLoading] = useState(true);
     const [total, setTotal] = useState(0);
     const [loadError, setLoadError] = useState(false);
-    const { showError } = useSnackbar();
+    const { showError, showUndo } = useSnackbar();
     const loadingRef = useRef(false);
     const latestRequestRef = useRef(0);
+    // Deleted on screen, but the server delete waits until the undo offer ends.
+    const pendingDeletesRef = useRef(new Map<number, Product>());
     const [searchParams, setSearchParams] = useSearchParams();
     const [categoriesIds, setCategoriesIds] = useState<number[]>(() =>
         searchParams.getAll('category').map(Number)
     );
+    const filterRef = useRef(categoriesIds);
     const [categories, setCategories] = useState<Category[]>([]);
 
     useEffect(() => {
@@ -65,8 +73,11 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
         try {
             const { products, nextCursor, total } = await getProducts(ids, cursor);
             if (isOutdated()) return;
-            setProducts(prev => append ? [...prev, ...products] : products);
-            setTotal(total);
+            const pendingDeletes = pendingDeletesRef.current;
+            const shownProducts = products.filter(p => !pendingDeletes.has(p.id));
+            const pendingInFilter = [...pendingDeletes.values()].filter(p => matchesFilter(ids, p)).length;
+            setProducts(prev => append ? [...prev, ...shownProducts] : shownProducts);
+            setTotal(total - pendingInFilter);
             setCursor(nextCursor);
             setHasMore(nextCursor !== null);
         } catch {
@@ -90,6 +101,7 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
     const setFilter = (ids: number[]) => {
         setSearchParams(ids.length ? { category: ids.map(String) } : {});
         setCategoriesIds(ids);
+        filterRef.current = ids;
         reload(ids);
     };
 
@@ -103,17 +115,51 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
     }, [categoriesIds]);
 
 
-    const deleteProductFromState = (id: number) => {
-        const product = products.find(p => p.id === id);
-        setProducts(prev => prev.filter(p => p.id !== id));
+    const changeCategoryCount = (categoryId: number, change: number) => {
+        setCategories(prev => prev.map(c =>
+            c.id === categoryId
+                ? { ...c, _count: { products: Math.max(0, (c._count?.products ?? 0) + change) } }
+                : c
+        ));
+    };
+
+    const removeProductFromState = (product: Product) => {
+        setProducts(prev => prev.filter(p => p.id !== product.id));
         setTotal(prev => prev - 1);
-        if (product) {
-            setCategories(prev => prev.map(c =>
-                c.id === product.category.id
-                    ? { ...c, _count: { products: Math.max(0, (c._count?.products ?? 1) - 1) } }
-                    : c
-            ));
+        changeCategoryCount(product.category.id, -1);
+    };
+
+    const restoreProductToState = (product: Product, index: number) => {
+        changeCategoryCount(product.category.id, 1);
+        if (!matchesFilter(filterRef.current, product)) return;
+        setProducts(prev => prev.some(p => p.id === product.id)
+            ? prev
+            : [...prev.slice(0, index), product, ...prev.slice(index)]);
+        setTotal(prev => prev + 1);
+    };
+
+    const sendDelete = async (product: Product, index: number) => {
+        try {
+            await deleteProduct(product.id);
+        } catch {
+            restoreProductToState(product, index);
+            showError("Couldn't delete this item. Please try again.");
+        } finally {
+            pendingDeletesRef.current.delete(product.id);
         }
+    };
+
+    const deleteWithUndo = (product: Product) => {
+        const index = products.findIndex(p => p.id === product.id);
+        removeProductFromState(product);
+        pendingDeletesRef.current.set(product.id, product);
+        showUndo("Item deleted", {
+            onUndo: () => {
+                pendingDeletesRef.current.delete(product.id);
+                restoreProductToState(product, index);
+            },
+            onDismiss: () => sendDelete(product, index),
+        });
     };
 
     const addProductToState = useCallback((newProduct: Product) => {
@@ -145,7 +191,7 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
             total,
             categoriesIds,
             updateProductInState,
-            deleteProductFromState,
+            deleteWithUndo,
             addProductToState,
             reassignCategoryInState,
             setFilter,
