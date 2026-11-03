@@ -47,11 +47,7 @@ export default function NewProductDialog({ fullPage = false }: { fullPage?: bool
   return isModal ? (
     <Dialog open onClose={handleClose} fullWidth maxWidth="sm" fullScreen={isMobile}>
       <DialogTitle sx={{ display: 'flex', justifyContent: 'center' }}>{title}</DialogTitle>
-      <DialogContent sx={isMobile ? {
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-      } : undefined}>{content}</DialogContent>
+      <DialogContent>{content}</DialogContent>
     </Dialog>
   ) : (
     <div style={{ maxWidth: 640, margin: "64px auto", padding: 16 }}>

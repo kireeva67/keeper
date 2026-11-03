@@ -46,11 +46,7 @@ export default function EditProductDialog() {
     return (
         <Dialog open onClose={handleClose} fullWidth maxWidth="sm" fullScreen={isMobile}>
             <DialogTitle sx={{ display: 'flex', justifyContent: 'center' }}>{addingCategory ? "New category" : "Edit Product"}</DialogTitle>
-            <DialogContent sx={isMobile ? {
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center',
-            } : undefined}>
+            <DialogContent>
                 {loading ? (
                     <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
                         <CircularProgress />
