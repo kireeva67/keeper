@@ -116,6 +116,48 @@ test.describe('products and categories', () => {
         await expect(app.card('Book item')).toBeVisible();
     });
 
+    test('Undo after delete brings the card back and the product is kept', async ({ page }) => {
+        await app.addProduct('Undo me', 'undo-me');
+        await app.card('Undo me').getByRole('button', { name: 'more options' }).click();
+        await page.getByRole('menuitem', { name: 'Delete' }).click();
+        await expect(app.card('Undo me')).toBeHidden();
+
+        await page.getByRole('button', { name: 'Undo' }).click();
+
+        await expect(app.card('Undo me')).toBeVisible();
+        await page.reload();
+        await expect(app.card('Undo me')).toBeVisible();
+    });
+
+    test('a delete without Undo stays hidden during a reload of the list and is saved when the offer ends', async ({ page }) => {
+        await app.addProduct('Gone item', 'gone-item');
+        await app.card('Gone item').getByRole('button', { name: 'more options' }).click();
+        await page.getByRole('menuitem', { name: 'Delete' }).click();
+        await expect(page.getByText('Item deleted')).toBeVisible();
+
+        await page.getByRole('button', { name: /^other/ }).click();
+        await expect(page.getByText('Nothing in other yet')).toBeVisible();
+
+        await expect(page.getByText('Item deleted')).toBeHidden({ timeout: 10_000 });
+        await page.reload();
+        await expect(page.getByText('Nothing in other yet')).toBeVisible();
+    });
+
+    test('closing the tab during the undo offer still deletes the product', async ({ page, context }) => {
+        await app.addProduct('Closed tab item', 'closed-tab-item');
+        await app.card('Closed tab item').getByRole('button', { name: 'more options' }).click();
+        await page.getByRole('menuitem', { name: 'Delete' }).click();
+        await expect(page.getByText('Item deleted')).toBeVisible();
+
+        await page.close({ runBeforeUnload: true });
+
+        const freshPage = await context.newPage();
+        await expect(async () => {
+            await freshPage.goto('/products');
+            await expect(freshPage.getByText('Nothing saved yet')).toBeVisible({ timeout: 1000 });
+        }).toPass({ timeout: 4000 });
+    });
+
     test('category names are trimmed, inner spaces collapsed, and duplicates are found ignoring case, including system ones', async ({ page }) => {
         await page.getByRole('button', { name: 'add product' }).click();
         const dialog = page.getByRole('dialog', { name: 'New product' });

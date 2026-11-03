@@ -15,14 +15,12 @@ import {
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { deleteProduct } from "../api/deleteProduct";
 import type { Product } from "../../../shared/types/ProductType";
 import { DEFAULT_PRODUCT_IMAGE } from "./DefaultImage";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useProducts } from "../api/useProducts";
 import { alpha } from "@mui/material/styles";
 import { useState } from "react";
-import { useSnackbar } from "../../../shared/snackbar/useSnackbar";
 import { CategoryChipColors } from "../categories/categoryChipSx";
 
 type CardProps = {
@@ -37,24 +35,16 @@ export function ProductCard({ product }: CardProps) {
     const closeMenu = () => setAnchorEl(null);
     const navigate = useNavigate();
     const location = useLocation();
-    const { deleteProductFromState } = useProducts();
-    const { showError } = useSnackbar();
+    const { deleteWithUndo } = useProducts();
 
     const handleEdit = () => {
         closeMenu();
         navigate(`/products/edit/${id}`, { state: { background: location } });
     };
 
-    const handleDelete = async () => {
+    const handleDelete = () => {
         closeMenu();
-        try {
-            const success = await deleteProduct(id);
-            if (success) {
-                deleteProductFromState(id);
-            }
-        } catch {
-            showError("Couldn't delete this item. Please try again.");
-        }
+        deleteWithUndo(product);
     };
 
     return (
