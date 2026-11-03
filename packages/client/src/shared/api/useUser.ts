@@ -1,23 +1,29 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { getUser } from "./getUser";
 import { http } from "./http";
+
+type LoadStatus = "loading" | "loaded" | "failed";
 
 export function useUser() {
     const [email, setEmail] = useState<string>("");
     const [hasPassword, setHasPassword] = useState<boolean>(false);
+    const [loadStatus, setLoadStatus] = useState<LoadStatus>("loading");
+
+    const loadUser = useCallback(async () => {
+        setLoadStatus("loading");
+        try {
+            const user = await getUser();
+            setHasPassword(user.hasPassword);
+            setEmail(user.email);
+            setLoadStatus("loaded");
+        } catch {
+            setLoadStatus("failed");
+        }
+    }, []);
 
     useEffect(() => {
-        const fetchEmail = async () => {
-            try {
-                const user = await getUser();
-                setHasPassword(user.hasPassword);
-                setEmail(user.email);
-            } catch {
-                // 401s are handled globally by UnauthorizedBridge; ignore transient errors
-            }
-        };
-        fetchEmail();
-    }, []);
+        loadUser();
+    }, [loadUser]);
 
     const updatePassword = async (newPassword: string, currentPassword?: string) => {
         await http(`/api/me`, {
@@ -27,5 +33,5 @@ export function useUser() {
         setHasPassword(true);
     };
 
-    return { email, hasPassword, updatePassword };
+    return { email, hasPassword, loadStatus, retryLoad: loadUser, updatePassword };
 }

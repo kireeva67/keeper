@@ -1,4 +1,4 @@
-import { Box, Button, Typography } from "@mui/material";
+import { Alert, Box, Button, Typography } from "@mui/material";
 import { useState } from "react";
 import { useUser } from "../../../shared/api/useUser";
 import { UserAvatar } from "../../../shared/components/UserAvatar";
@@ -6,9 +6,12 @@ import { validatePassword } from "../../../shared/utils/validatePassword";
 import { PasswordTextField } from "../../../shared/components/PasswordTextField";
 import { ForgotPasswordButton } from "../../../shared/components/ForgotPasswordButton";
 import { FROM_STATE } from "../../../shared/types/FromStateType";
+import { HttpError } from "../../../shared/errors/HTTPError";
+import { useSnackbar } from "../../../shared/snackbar/useSnackbar";
 
 export function ProfileSection() {
-    const { email, hasPassword, updatePassword } = useUser();
+    const { email, hasPassword, loadStatus, retryLoad, updatePassword } = useUser();
+    const { showError } = useSnackbar();
     const [currentPassword, setCurrentPassword] = useState("");
     const [newPassword, setNewPassword] = useState("");
     const [errors, setErrors] = useState<{ current?: string; new?: string }>({});
@@ -30,46 +33,63 @@ export function ProfileSection() {
             setErrors({});
             setSuccess(true);
             setTimeout(() => setSuccess(false), 5000);
-        } catch {
+        } catch (err) {
             setSuccess(false);
-            setErrors({ current: "Current password is incorrect" });
+            const passwordRejected = err instanceof HttpError && err.status === 400;
+            if (!passwordRejected) {
+                showError("Couldn't update your password. Please try again.");
+                return;
+            }
+            const aboutCurrentPassword = hasPassword && err.message.startsWith("Current password");
+            setErrors(aboutCurrentPassword ? { current: err.message } : { new: err.message });
         }
     };
 
     return (
         <Box sx={{ width: '100%' }}>
             <Typography variant="overline" color="text.secondary" sx={{ mb: 1.5, display: 'block' }}>Profile</Typography>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 2, mt: 1, mb: 2 }}>
-                <UserAvatar />
-                <Typography color="text.secondary">{email}</Typography>
-            </Box>
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, width: '100%' }}>
-                {hasPassword && (
-                    <PasswordTextField
-                        label="Current password" size="small" fullWidth
-                        value={currentPassword} onChange={e => setCurrentPassword(e.target.value)}
-                        error={!!errors.current} helperText={errors.current}
-                    />
-                )}
-                <PasswordTextField
-                    label="New password" size="small" fullWidth
-                    value={newPassword} onChange={e => setNewPassword(e.target.value)}
-                    error={!!errors.new} helperText={errors.new}
-                />
-                {hasPassword && <Box sx={{ alignSelf: 'flex-start' }}><ForgotPasswordButton from={FROM_STATE.SETTINGS} /></Box>}
-                {success && (
-                    <Typography
-                        variant="body2"
-                        color="success.main"
-                        sx={{ bgcolor: "rgba(46, 125, 50, 0.1)", px: 1.5, py: 0.5, borderRadius: 1, textAlign: 'center' }}
-                    >
-                        Password updated successfully
-                    </Typography>
-                )}
-                <Button variant="contained" fullWidth onClick={onSubmit}>
-                    {hasPassword ? "Update password" : "Set password"}
-                </Button>
-            </Box>
+            {loadStatus === "failed" && (
+                <Alert severity="error"
+                    action={<Button color="inherit" size="small" onClick={retryLoad}>Retry</Button>}
+                >
+                    Couldn't load your profile.
+                </Alert>
+            )}
+            {loadStatus === "loaded" && (
+                <>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 2, mt: 1, mb: 2 }}>
+                        <UserAvatar />
+                        <Typography color="text.secondary">{email}</Typography>
+                    </Box>
+                    <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, width: '100%' }}>
+                        {hasPassword && (
+                            <PasswordTextField
+                                label="Current password" size="small" fullWidth
+                                value={currentPassword} onChange={e => setCurrentPassword(e.target.value)}
+                                error={!!errors.current} helperText={errors.current}
+                            />
+                        )}
+                        <PasswordTextField
+                            label="New password" size="small" fullWidth
+                            value={newPassword} onChange={e => setNewPassword(e.target.value)}
+                            error={!!errors.new} helperText={errors.new}
+                        />
+                        {hasPassword && <Box sx={{ alignSelf: 'flex-start' }}><ForgotPasswordButton from={FROM_STATE.SETTINGS} /></Box>}
+                        {success && (
+                            <Typography
+                                variant="body2"
+                                color="success.main"
+                                sx={{ bgcolor: "rgba(46, 125, 50, 0.1)", px: 1.5, py: 0.5, borderRadius: 1, textAlign: 'center' }}
+                            >
+                                Password updated successfully
+                            </Typography>
+                        )}
+                        <Button variant="contained" fullWidth onClick={onSubmit}>
+                            {hasPassword ? "Update password" : "Set password"}
+                        </Button>
+                    </Box>
+                </>
+            )}
         </Box>
     );
 }
