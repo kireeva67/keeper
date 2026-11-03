@@ -23,6 +23,7 @@ import { useProducts } from "../api/useProducts";
 import { alpha } from "@mui/material/styles";
 import { useState } from "react";
 import { useSnackbar } from "../../../shared/snackbar/useSnackbar";
+import { CategoryChipColors } from "../categories/categoryChipSx";
 
 type CardProps = {
     product: Product;
@@ -96,7 +97,7 @@ export function ProductCard({ product }: CardProps) {
                     size="small"
                     sx={{
                         backgroundColor: alpha(category.color, 0.12),
-                        color: category.color,
+                        color: (theme) => CategoryChipColors.readableText(category.color, theme.palette.background.default),
                         fontWeight: 500,
                         border: `1px solid ${category.color}22`,
                         borderRadius: '20px',
