@@ -13,7 +13,7 @@ Keeper lets users save and organize bookmarks ("products") with titles, descript
 ## Tech Stack
 
 - React
-- MUI v5 (`@mui/material`) with `createTheme`
+- MUI v7 (`@mui/material` 7.3) with `createTheme`
 - Mobile-first, used primarily on small screens
 
 ---
@@ -56,44 +56,15 @@ createTheme({
 
 Category chips/labels must be **colorful but follow accessible color rules**:
 
-- Each category gets a **fixed, deterministic color** based on its name (use a hash function, not random)
-- Use a **curated pastel palette** — never neon, never grayscale
-- Text color must **always pass WCAG AA contrast** against its background chip color
-- Use `color` for the chip border and text, and a **10–15% opacity tint** of the same color as background
+- The user **picks** a category's color from the preset swatches in `NewCategoryView.tsx` (`PRESET_COLORS`); system categories have fixed colors set by the Prisma migrations. Never assign random colors.
+- Style chips with `categoryChipSx(color)` from `categories/categoryChipSx.ts`: the picked color as the border, a **25% opacity tint** of it as the background.
+- Chip text uses `CategoryChipColors.readableText`, which darkens the picked color until it reaches **4.5:1 (WCAG AA)** against the tint over `background.default`. Never set chip text color by hand.
+- A new preset must pass `categoryChipSx.test.ts`; `e2e/contrast.spec.ts` measures the rendered chips in the browser.
 
-### Suggested palette pool for category colors:
-```js
-const CATEGORY_COLORS = [
-  { bg: '#fce4ec', text: '#880e4f' }, // rose
-  { bg: '#e8f5e9', text: '#1b5e20' }, // green
-  { bg: '#e3f2fd', text: '#0d47a1' }, // blue
-  { bg: '#fff8e1', text: '#e65100' }, // amber
-  { bg: '#f3e5f5', text: '#4a148c' }, // purple
-  { bg: '#e0f7fa', text: '#006064' }, // teal
-  { bg: '#fbe9e7', text: '#bf360c' }, // deep orange
-  { bg: '#ede7f6', text: '#311b92' }, // deep purple
-];
-
-// Assign by hashing the category name string:
-function getCategoryColor(name) {
-  const hash = [...name].reduce((acc, c) => acc + c.charCodeAt(0), 0);
-  return CATEGORY_COLORS[hash % CATEGORY_COLORS.length];
-}
-```
-
-Apply to MUI `<Chip>` like:
 ```jsx
-<Chip
-  label={category}
-  size="small"
-  sx={{
-    backgroundColor: color.bg,
-    color: color.text,
-    fontWeight: 500,
-    border: `1px solid ${color.text}22`,
-    borderRadius: '20px',
-  }}
-/>
+<ToggleButton value={cat.id} sx={{ ...categoryChipSx(cat.color) }}>
+  {cat.name.toLowerCase()}
+</ToggleButton>
 ```
 
 ---
@@ -181,7 +152,7 @@ Cards are currently overflowing on mobile. Follow these rules:
 - Do not use `sx={{ color: '#5e2d91' }}` inline — use `color="primary"` or `sx={{ color: 'primary.main' }}`
 - Do not set fixed `width` or `height` in px on card or image components
 - Do not use `!important` in `sx` props
-- Do not use random colors for categories — always derive from the hash function
+- Do not use random colors for categories — use the color the user picked (or the system category's color)
 - Do not mix `variant="outlined"` and `variant="contained"` for the same action type across different screens
 
 ---
