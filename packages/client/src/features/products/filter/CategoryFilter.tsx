@@ -20,7 +20,7 @@ const pillSx = {
     minWidth: 'unset',
     whiteSpace: 'nowrap',
     bgcolor: 'action.hover',
-    color: 'text.disabled',
+    color: 'text.secondary',
     border: '1px solid transparent !important',
 };
 
