@@ -6,6 +6,7 @@ import { ValidationError } from "../error/ValidationError";
 import { addCategoryLimiter } from "../middleware/CategoriesLimiter";
 import { logger } from "../utils/logger";
 import { FieldValidator } from "../utils/FieldValidator";
+import { normalizeCategoryName } from "../utils/normalizeCategoryName";
 
 export const categoriesRouter = Router();
 
@@ -26,7 +27,7 @@ categoriesRouter.post(`/`, requireAuth, addCategoryLimiter, async (req, res) => 
         const user = (req as any).user;
         const body: TTableCategoryData = req.body;
         FieldValidator.assertCategoryFields(body);
-        const name = body.name.trim();
+        const name = normalizeCategoryName(body.name);
         const existingCategory = await prismaController.findVisibleCategoryByNameIgnoringCase(name, user.email);
         if (existingCategory) {
             return res.status(409).json({

@@ -95,7 +95,7 @@ test.describe('products and categories', () => {
         await expect(app.card('Film item')).toBeVisible();
     });
 
-    test('category names are trimmed and duplicates are found ignoring case, including system ones', async ({ page }) => {
+    test('category names are trimmed, inner spaces collapsed, and duplicates are found ignoring case, including system ones', async ({ page }) => {
         await page.getByRole('button', { name: 'add product' }).click();
         const dialog = page.getByRole('dialog', { name: 'New product' });
         const categoryView = page.getByRole('dialog', { name: 'New category' });
@@ -114,6 +114,12 @@ test.describe('products and categories', () => {
 
         await dialog.getByRole('button', { name: 'New category' }).click();
         await addCategory('GARDEN');
+        await expect(categoryView.getByText('This category already exists.')).toBeVisible();
+
+        await addCategory('my   plants');
+        await expect(categoryView).toBeHidden();
+        await dialog.getByRole('button', { name: 'New category' }).click();
+        await addCategory('My Plants');
         await expect(categoryView.getByText('This category already exists.')).toBeVisible();
     });
 

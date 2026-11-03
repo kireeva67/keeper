@@ -55,6 +55,14 @@ describe('POST /api/categories', () => {
         expect(prismaController.createCategory).toHaveBeenCalledWith(mockedUser.email, { name: 'Books', color: '#c62828' });
     });
 
+    it('collapses repeated spaces inside the name', async () => {
+        vi.mocked(prismaController.findVisibleCategoryByNameIgnoringCase).mockResolvedValueOnce(null);
+        vi.mocked(prismaController.createCategory).mockResolvedValueOnce({ id: 21, name: 'my books' } as any);
+        await request(app).post('/api/categories').send({ name: 'my  \t books', color: '#c62828' });
+        expect(prismaController.findVisibleCategoryByNameIgnoringCase).toHaveBeenCalledWith('my books', mockedUser.email);
+        expect(prismaController.createCategory).toHaveBeenCalledWith(mockedUser.email, { name: 'my books', color: '#c62828' });
+    });
+
     it('returns 400 for a name of only spaces, before any lookup', async () => {
         const res = await request(app).post('/api/categories').send({ name: '   ', color: '#c62828' });
         expect(res.status).toBe(400);
