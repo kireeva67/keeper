@@ -1,4 +1,4 @@
-import { getContrastRatio, rgbToHex } from "@mui/material/styles";
+import { decomposeColor, rgbToHex } from "@mui/material/styles";
 import { CategoryChipColors } from "./categoryChipSx";
 
 const pageBackground = '#f5f5f5';
@@ -9,15 +9,26 @@ const colorGrid = channelSteps.flatMap(r => channelSteps.flatMap(g => channelSte
 
 function tintOver(base: string, color: string, opacity: number) {
     const channel = (hex: string, i: number) => parseInt(hex.slice(1 + i * 2, 3 + i * 2), 16);
-    const mixed = [0, 1, 2].map(i => Math.round(channel(base, i) * (1 - opacity) + channel(color, i) * opacity));
-    return rgbToHex(`rgb(${mixed.join(', ')})`);
+    const mixed = [0, 1, 2].map(i => channel(base, i) * (1 - opacity) + channel(color, i) * opacity);
+    return `rgb(${mixed.join(', ')})`;
+}
+
+function exactContrast(foreground: string, background: string) {
+    const luminance = (color: string) => {
+        const [r, g, b] = decomposeColor(color).values.slice(0, 3)
+            .map(v => v / 255)
+            .map(v => v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4);
+        return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    };
+    const [lighter, darker] = [luminance(foreground), luminance(background)].sort((a, b) => b - a);
+    return (lighter + 0.05) / (darker + 0.05);
 }
 
 describe('CategoryChipColors.readableText', () => {
     it.each([...presetColors, ...systemColors, ...colorGrid])('%s reaches 4.5:1 on the chip and the card', (color) => {
         const text = CategoryChipColors.readableText(color, pageBackground);
-        expect(getContrastRatio(text, tintOver(pageBackground, color, 0.25))).toBeGreaterThanOrEqual(4.5);
-        expect(getContrastRatio(text, tintOver('#ffffff', color, 0.12))).toBeGreaterThanOrEqual(4.5);
+        expect(exactContrast(text, tintOver(pageBackground, color, 0.25))).toBeGreaterThanOrEqual(4.5);
+        expect(exactContrast(text, tintOver('#ffffff', color, 0.12))).toBeGreaterThanOrEqual(4.5);
     });
 
     it('keeps a color that is already readable', () => {
