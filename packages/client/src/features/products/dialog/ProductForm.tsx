@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Alert, Button, DialogActions, TextField } from "@mui/material";
+import { Alert, TextField } from "@mui/material";
 import type { Product } from "../../../shared/types/ProductType";
 import { useProductForm } from "../api/useProductForm";
 import CategoryPicker from "../categories/CategoryPicker";
@@ -7,6 +7,7 @@ import NewCategoryView from "./NewCategoryView";
 import type { Category } from "../../../shared/types/CategoryType";
 import { useProducts } from "../api/useProducts";
 import { FieldLimits } from "../../../shared/utils/FieldLimits";
+import { FormActions } from "./FormActions";
 
 export type FormProps = {
   initialData?: Product; // If exists === edit mode
@@ -14,9 +15,10 @@ export type FormProps = {
   onSuccess: (updatedProduct?: Product) => void;
   // Lets the dialog show "New category" as its title while the category view is open.
   onAddingCategoryChange?: (adding: boolean) => void;
+  topBarTitle?: string;
 };
 
-export function ProductForm({ initialData, onCancel, onSuccess, onAddingCategoryChange }: FormProps) {
+export function ProductForm({ initialData, onCancel, onSuccess, onAddingCategoryChange, topBarTitle }: FormProps) {
   const isEdit = Boolean(initialData);
   const { values, setField, submitting, handleSubmit, urlError, setUrlError, titleError, setTitleError, formError } = useProductForm({ initialData, onSuccess });
   const { categories, addCategory } = useProducts();
@@ -44,12 +46,23 @@ export function ProductForm({ initialData, onCancel, onSuccess, onAddingCategory
     setAddingCategory(false);
   };
 
+  const actions = (
+    <FormActions
+      submitLabel={isEdit ? "Save Changes" : "Create"}
+      submitting={submitting}
+      onDismiss={() => onCancel?.()}
+      dismissAs="close"
+      topBarTitle={topBarTitle}
+    />
+  );
+
   return (
     <>
       {/* noValidate: required fields are checked in useProductForm and shown as MUI helper
           text, instead of the browser's own "Please fill in this field" bubble.
           hidden, not unmounted, while adding a category, so typed values are kept. */}
       <form onSubmit={handleSubmit} noValidate hidden={addingCategory}>
+        {topBarTitle && !addingCategory && actions}
         {formError && <Alert severity="error" sx={{ mt: 2 }}>{formError}</Alert>}
         <TextField
           value={values.title}
@@ -94,17 +107,14 @@ export function ProductForm({ initialData, onCancel, onSuccess, onAddingCategory
           addButtonRef={addCategoryButtonRef}
         />
 
-        <DialogActions sx={{ px: 0, pt: 2 }}>
-          <Button onClick={onCancel} disabled={submitting}>
-            Cancel
-          </Button>
-          <Button type="submit" variant="contained" disabled={submitting}>
-            {isEdit ? "Save Changes" : "Create"}
-          </Button>
-        </DialogActions>
+        {!topBarTitle && actions}
       </form>
       {addingCategory &&
-        <NewCategoryView onBack={() => setAddingCategory(false)} onCreated={handleCategoryCreated} />}
+        <NewCategoryView
+          onBack={() => setAddingCategory(false)}
+          onCreated={handleCategoryCreated}
+          topBarTitle={topBarTitle ? "New category" : undefined}
+        />}
     </>
   );
 }

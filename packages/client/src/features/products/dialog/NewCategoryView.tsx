@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { Box, Button, DialogActions, TextField, Typography } from "@mui/material";
+import { Box, TextField, Typography } from "@mui/material";
 import CheckIcon from "@mui/icons-material/Check";
 import type { Category } from "../../../shared/types/CategoryType";
 import { addCategory } from "../api/addCategory";
 import { FieldLimits } from "../../../shared/utils/FieldLimits";
+import { FormActions } from "./FormActions";
 
 const PRESET_COLORS = [
     { name: 'Red', value: '#c62828' },
@@ -23,11 +24,12 @@ const PRESET_COLORS = [
 type Props = {
     onBack: () => void;
     onCreated: (category: Category) => void;
+    topBarTitle?: string;
 };
 
 // Shown in place of the product form, inside the same dialog, so two dialogs never stack.
 // The dialog title changes to "New category" while it is shown (see ProductForm).
-export default function NewCategoryView({ onBack, onCreated }: Props) {
+export default function NewCategoryView({ onBack, onCreated, topBarTitle }: Props) {
     const [name, setName] = useState("");
     const [color, setColor] = useState(PRESET_COLORS[0].value);
     const [error, setError] = useState<string | null>(null);
@@ -58,8 +60,13 @@ export default function NewCategoryView({ onBack, onCreated }: Props) {
         }
     };
 
+    const actions = (
+        <FormActions submitLabel="Add" submitting={submitting} onDismiss={onBack} dismissAs="back" topBarTitle={topBarTitle} />
+    );
+
     return (
         <form onSubmit={handleSubmit} onKeyDown={handleKeyDown} noValidate>
+            {topBarTitle && actions}
             <TextField
                 value={name}
                 onChange={(e) => { setName(e.target.value); if (error) setError(null); }}
@@ -112,10 +119,7 @@ export default function NewCategoryView({ onBack, onCreated }: Props) {
                     );
                 })}
             </Box>
-            <DialogActions sx={{ px: 0, pt: 4 }}>
-                <Button onClick={onBack} disabled={submitting}>Cancel</Button>
-                <Button type="submit" variant="contained" disabled={submitting}>Add</Button>
-            </DialogActions>
+            {!topBarTitle && <Box sx={{ pt: 2 }}>{actions}</Box>}
         </form>
     );
 }
