@@ -7,7 +7,7 @@ const mockedUser = { email: 'test@example.com', password: 'ValidPass1!' };
 
 vi.mock('../prisma/PrismaController', () => ({
     prismaController: {
-        findCategoryByName: vi.fn(),
+        findVisibleCategoryByNameIgnoringCase: vi.fn(),
         createCategory: vi.fn(),
         deleteCategory: vi.fn()
     }
@@ -32,7 +32,7 @@ describe('POST /api/categories', () => {
     });
 
     it('returns 409 if category name already exists', async () => {
-        vi.mocked(prismaController.findCategoryByName).mockResolvedValueOnce({ name: 'test', email: mockedUser.email } as any);
+        vi.mocked(prismaController.findVisibleCategoryByNameIgnoringCase).mockResolvedValueOnce({ name: 'test', email: mockedUser.email } as any);
         const res = await request(app).post('/api/categories')
             .send({ name: 'test', email: mockedUser.email });
         expect(res.status).toBe(409);
@@ -40,11 +40,25 @@ describe('POST /api/categories', () => {
     });
 
     it('returns category on success', async () => {
-        vi.mocked(prismaController.findCategoryByName).mockResolvedValueOnce(undefined as any);
+        vi.mocked(prismaController.findVisibleCategoryByNameIgnoringCase).mockResolvedValueOnce(undefined as any);
         vi.mocked(prismaController.createCategory).mockResolvedValueOnce({ name: 'test', email: mockedUser.email } as any);
         const res = await request(app).post('/api/categories')
             .send({ name: 'test', email: mockedUser.email });
         expect(res.body).toEqual({ name: 'test', email: mockedUser.email });
+    });
+
+    it('trims the name before the duplicate check and before saving', async () => {
+        vi.mocked(prismaController.findVisibleCategoryByNameIgnoringCase).mockResolvedValueOnce(null);
+        vi.mocked(prismaController.createCategory).mockResolvedValueOnce({ id: 20, name: 'Books' } as any);
+        await request(app).post('/api/categories').send({ name: '  Books  ', color: '#c62828' });
+        expect(prismaController.findVisibleCategoryByNameIgnoringCase).toHaveBeenCalledWith('Books', mockedUser.email);
+        expect(prismaController.createCategory).toHaveBeenCalledWith(mockedUser.email, { name: 'Books', color: '#c62828' });
+    });
+
+    it('returns 400 for a name of only spaces, before any lookup', async () => {
+        const res = await request(app).post('/api/categories').send({ name: '   ', color: '#c62828' });
+        expect(res.status).toBe(400);
+        expect(prismaController.findVisibleCategoryByNameIgnoringCase).not.toHaveBeenCalled();
     });
 
     it('returns 400 if the name is too long, before any lookup', async () => {
@@ -52,7 +66,7 @@ describe('POST /api/categories', () => {
             .send({ name: 'c'.repeat(25), color: '#c62828' });
         expect(res.status).toBe(400);
         expect(res.body).toEqual({ message: 'Category name must be at most 24 characters.' });
-        expect(prismaController.findCategoryByName).not.toHaveBeenCalled();
+        expect(prismaController.findVisibleCategoryByNameIgnoringCase).not.toHaveBeenCalled();
         expect(prismaController.createCategory).not.toHaveBeenCalled();
     });
 })

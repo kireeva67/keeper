@@ -26,13 +26,14 @@ categoriesRouter.post(`/`, requireAuth, addCategoryLimiter, async (req, res) => 
         const user = (req as any).user;
         const body: TTableCategoryData = req.body;
         FieldValidator.assertCategoryFields(body);
-        const existingCategory = await prismaController.findCategoryByName(body.name, user.email);
+        const name = body.name.trim();
+        const existingCategory = await prismaController.findVisibleCategoryByNameIgnoringCase(name, user.email);
         if (existingCategory) {
             return res.status(409).json({
                 message: 'This category already exists.'
             });
         }
-        const category = await prismaController.createCategory(user.email, body);
+        const category = await prismaController.createCategory(user.email, { ...body, name });
         res.json(category);
     } catch (error) {
         if (error instanceof ValidationError) {

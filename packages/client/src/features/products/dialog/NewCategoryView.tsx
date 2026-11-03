@@ -43,7 +43,7 @@ export default function NewCategoryView({ onBack, onCreated, topBarTitle }: Prop
         }
         setSubmitting(true);
         try {
-            const created = await addCategory({ name, color });
+            const created = await addCategory({ name: name.trim(), color });
             onCreated(created);
         } catch (err) {
             setError(err instanceof Error ? err.message : "Failed to create category.");

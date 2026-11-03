@@ -253,16 +253,13 @@ export class PrismaController {
         });
     }
 
-    public async findCategoryByName(name: string, email: string) {
-        return await prisma.category.findFirst({
-            where: {
-                name,
-                user: {
-                    email: email
-                }
-
-            }
+    public async findVisibleCategoryByNameIgnoringCase(name: string, email: string) {
+        const visibleCategories = await prisma.category.findMany({
+            where: { OR: [{ userId: null }, { user: { email } }] },
+            select: { id: true, name: true },
         });
+        const wanted = name.toLowerCase();
+        return visibleCategories.find(category => category.name.toLowerCase() === wanted) ?? null;
     }
 
     public async createCategory(email: string, data: TTableCategoryData) {
