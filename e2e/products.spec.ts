@@ -95,6 +95,34 @@ test.describe('products and categories', () => {
         await expect(app.card('Film item')).toBeVisible();
     });
 
+    test('category names are trimmed, inner spaces collapsed, and duplicates are found ignoring case, including system ones', async ({ page }) => {
+        await page.getByRole('button', { name: 'add product' }).click();
+        const dialog = page.getByRole('dialog', { name: 'New product' });
+        const categoryView = page.getByRole('dialog', { name: 'New category' });
+        const addCategory = async (name: string) => {
+            await categoryView.getByLabel('Name').fill(name);
+            await categoryView.getByRole('button', { name: 'Add', exact: true }).click();
+        };
+        await dialog.getByRole('button', { name: 'New category' }).click();
+
+        await addCategory(' books ');
+        await expect(categoryView.getByText('This category already exists.')).toBeVisible();
+
+        await addCategory('  Garden  ');
+        await expect(categoryView).toBeHidden();
+        await expect(dialog.getByRole('button', { name: 'garden', exact: true })).toBeVisible();
+
+        await dialog.getByRole('button', { name: 'New category' }).click();
+        await addCategory('GARDEN');
+        await expect(categoryView.getByText('This category already exists.')).toBeVisible();
+
+        await addCategory('my   plants');
+        await expect(categoryView).toBeHidden();
+        await dialog.getByRole('button', { name: 'New category' }).click();
+        await addCategory('My Plants');
+        await expect(categoryView.getByText('This category already exists.')).toBeVisible();
+    });
+
     test('a new account sees the empty state, and an empty filter names its category', async ({ page }) => {
         await expect(page.getByText('Nothing saved yet')).toBeVisible();
 
