@@ -17,6 +17,7 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
     const [loadError, setLoadError] = useState(false);
     const { showError } = useSnackbar();
     const loadingRef = useRef(false);
+    const latestRequestRef = useRef(0);
     const [searchParams, setSearchParams] = useSearchParams();
     const [categoriesIds, setCategoriesIds] = useState<number[]>(() =>
         searchParams.getAll('category').map(Number)
@@ -52,30 +53,33 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
     }, []);
 
     const reload = useCallback(async (ids: number[]) => {
-        if (loadingRef.current) return;
         await fetchProducts(ids, null, false);
     }, []);
 
     const fetchProducts = async (ids: number[], cursor: number | null, append: boolean) => {
+        const requestId = ++latestRequestRef.current;
+        const isOutdated = () => requestId !== latestRequestRef.current;
         loadingRef.current = true;
         setLoading(true);
         setLoadError(false);
         try {
             const { products, nextCursor, total } = await getProducts(ids, cursor);
+            if (isOutdated()) return;
             setProducts(prev => append ? [...prev, ...products] : products);
             setTotal(total);
             setCursor(nextCursor);
             setHasMore(nextCursor !== null);
-            // An earlier request may have failed after this one started.
-            setLoadError(false);
         } catch {
+            if (isOutdated()) return;
             // A failed first page or filter change leaves nothing stale on screen,
             // so the list can show its Retry state. A failed "Load More" keeps what is loaded.
             if (!append) setProducts([]);
             setLoadError(true);
         } finally {
-            setLoading(false);
-            loadingRef.current = false;
+            if (!isOutdated()) {
+                setLoading(false);
+                loadingRef.current = false;
+            }
         }
     }
 
