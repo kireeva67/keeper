@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { getUser } from "./getUser";
 import { http } from "./http";
 
@@ -9,21 +9,26 @@ export function useUser() {
     const [hasPassword, setHasPassword] = useState<boolean>(false);
     const [loadStatus, setLoadStatus] = useState<LoadStatus>("loading");
 
-    const loadUser = useCallback(async () => {
-        setLoadStatus("loading");
-        try {
-            const user = await getUser();
-            setHasPassword(user.hasPassword);
-            setEmail(user.email);
-            setLoadStatus("loaded");
-        } catch {
-            setLoadStatus("failed");
-        }
-    }, []);
+    const [loadAttempt, setLoadAttempt] = useState(0);
 
     useEffect(() => {
+        const loadUser = async () => {
+            try {
+                const user = await getUser();
+                setHasPassword(user.hasPassword);
+                setEmail(user.email);
+                setLoadStatus("loaded");
+            } catch {
+                setLoadStatus("failed");
+            }
+        };
         loadUser();
-    }, [loadUser]);
+    }, [loadAttempt]);
+
+    const retryLoad = () => {
+        setLoadStatus("loading");
+        setLoadAttempt(attempt => attempt + 1);
+    };
 
     const updatePassword = async (newPassword: string, currentPassword?: string) => {
         await http(`/api/me`, {
@@ -33,5 +38,5 @@ export function useUser() {
         setHasPassword(true);
     };
 
-    return { email, hasPassword, loadStatus, retryLoad: loadUser, updatePassword };
+    return { email, hasPassword, loadStatus, retryLoad, updatePassword };
 }
