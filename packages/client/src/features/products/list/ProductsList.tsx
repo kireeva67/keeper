@@ -2,9 +2,11 @@ import { Alert, Button, Typography } from "@mui/material";
 import { CardsGrid } from "../cards/CardsGrid";
 import { ProductCard } from "../cards/ProductCard";
 import { useProducts } from "../api/useProducts";
+import { SkeletonCards } from "./SkeletonCards";
+import { EmptyState } from "./EmptyState";
 
 export function ProductList() {
-    const { products, hasMore, loading, loadMore, loadError, retry } = useProducts();
+    const { products, hasMore, loading, loadMore, loadError, retry, categories, categoriesIds } = useProducts();
 
     if (loadError && products.length === 0) {
         return (
@@ -13,6 +15,22 @@ export function ProductList() {
             >
                 Couldn't load your items.
             </Alert>
+        );
+    }
+
+    const isEmpty = products.length === 0;
+    const allPagesLoaded = !hasMore;
+
+    if (isEmpty && loading) return <SkeletonCards />;
+
+    if (isEmpty && allPagesLoaded) {
+        const selectedNames = categories.filter(c => categoriesIds.includes(c.id)).map(c => c.name);
+        const allSelectedNamesKnown = selectedNames.length === categoriesIds.length;
+        return (
+            <EmptyState
+                filtered={categoriesIds.length > 0}
+                filterNames={allSelectedNamesKnown ? selectedNames : []}
+            />
         );
     }
 

@@ -12,7 +12,7 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
     const [products, setProducts] = useState<Product[]>([]);
     const [cursor, setCursor] = useState<number | null>(null);
     const [hasMore, setHasMore] = useState(true);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [total, setTotal] = useState(0);
     const [loadError, setLoadError] = useState(false);
     const { showError } = useSnackbar();
