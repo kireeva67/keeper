@@ -34,15 +34,16 @@ meRouter.put('/', requireAuth, async (req, res) => {
         const user = (req as any).user;
         const body: { newPassword: string; currentPassword: string } = req.body;
         const passwordError = await getPasswordError(user.password ?? null, body.currentPassword);
-        if (passwordError) return res.status(400).json({ error: passwordError });
+        if (passwordError) return res.status(400).json({ message: passwordError });
 
         const newError = validateNewPassword(body.newPassword);
-        if (newError) return res.status(400).json({ error: newError });
+        if (newError) return res.status(400).json({ message: newError });
 
         const hash = await hashPassword(body.newPassword);
         await prismaController.updatePassword(user.email, hash);
         res.json(true);
     } catch (error) {
+        logger.error({ err: error }, 'Failed to update password');
         res.status(500).json({ message: 'Failed to update password.' });
     }
 });

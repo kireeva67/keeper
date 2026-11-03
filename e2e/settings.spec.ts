@@ -49,6 +49,33 @@ test.describe('settings', () => {
         await expect(page).toHaveURL(/\/products$/);
     });
 
+    test('a server failure on password change is not reported as a wrong password', async ({ page }) => {
+        await page.route('**/api/me', route => route.request().method() === 'PUT'
+            ? route.fulfill({ status: 500, json: { message: 'Failed to update password.' } })
+            : route.fallback());
+
+        await page.getByLabel('Current password').fill(app.password);
+        await page.getByLabel('New password').fill('E2e-new-456!');
+        await page.getByRole('button', { name: 'Update password' }).click();
+
+        await expect(page.getByText("Couldn't update your password. Please try again.")).toBeVisible();
+        await expect(page.getByText('Current password is incorrect')).toBeHidden();
+    });
+
+    test('a failed profile load shows an error with retry', async ({ page }) => {
+        await page.route('**/api/me', route => route.fulfill({ status: 500, json: { message: 'Failed to fetch user info.' } }));
+        await page.reload();
+
+        await expect(page.getByText("Couldn't load your profile.")).toBeVisible();
+        await expect(page.getByRole('button', { name: 'Update password' })).toBeHidden();
+
+        await page.unroute('**/api/me');
+        await page.getByRole('button', { name: 'Retry' }).click();
+
+        await expect(page.getByText(email, { exact: true })).toBeVisible();
+        await expect(page.getByRole('button', { name: 'Update password' })).toBeVisible();
+    });
+
     test('13. deleting the account logs out and the login stops working', async ({ page }) => {
         await page.getByRole('button', { name: 'Delete account' }).click();
         const confirm = page.getByRole('dialog', { name: 'Delete account?' });

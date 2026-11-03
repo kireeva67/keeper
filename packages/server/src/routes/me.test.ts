@@ -69,7 +69,7 @@ describe('PUT /api/me', () => {
         const res = await request(app).put('/api/me')
             .send({ currentPassword: 'ValidPass1!', newPassword: 'NewValidPass1!' })
         expect(res.status).toBe(400);
-        expect(res.body).toEqual({ error: 'Current password is incorrect' });
+        expect(res.body).toEqual({ message: 'Current password is incorrect' });
     });
 
     it('returns 400 if new password fails validation', async () => {
@@ -77,7 +77,7 @@ describe('PUT /api/me', () => {
         const res = await request(app).put('/api/me')
             .send({ currentPassword: 'ValidPass1!', newPassword: 'NewValidPass1!' })
         expect(res.status).toBe(400);
-        expect(res.body).toEqual({ error: 'Password must be at least 8 characters' });
+        expect(res.body).toEqual({ message: 'Password must be at least 8 characters' });
     });
 
     it('returns true on success', async () => {
@@ -85,5 +85,13 @@ describe('PUT /api/me', () => {
         const res = await request(app).put('/api/me')
             .send({ currentPassword: 'ValidPass1!', newPassword: 'NewValidPass1!' })
         expect(res.body).toEqual(true);
+    })
+
+    it('returns 500 with a message if saving fails', async () => {
+        vi.mocked(prismaController.updatePassword).mockRejectedValueOnce(new Error('db down'));
+        const res = await request(app).put('/api/me')
+            .send({ currentPassword: 'ValidPass1!', newPassword: 'NewValidPass1!' })
+        expect(res.status).toBe(500);
+        expect(res.body).toEqual({ message: 'Failed to update password.' });
     })
 })

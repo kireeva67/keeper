@@ -200,7 +200,7 @@ Working agreements and gotchas for developing Keeper (separate from the design r
 
 - `packages/server/dev.db` can hold real data. Test with throwaway users (`something@example.invalid`), delete them afterwards and re-check the row counts.
 - Server tests mock Prisma, so database behavior needs a separate real-database check, for example a temporary `tsx` script (delete it afterwards). To run a second server instance, use a temporary entry file on another port (for example 3101).
-- Run before every PR: `npx tsc --noEmit` and `npx vitest run` in `packages/server`; `npx tsc -b` and `npx vitest run` in `packages/client`; `npm run test:e2e` and `npx tsc -p e2e` at the root.
+- Run before every PR: `npx tsc --noEmit` and `npx vitest run` in `packages/server`; `npx tsc -b` and `npx vitest run` in `packages/client`; `npm -w @repo/client run lint`, `npm run build`, `npm run test:e2e` and `npx tsc -p e2e` at the root. CI (`.github/workflows/`) runs the same steps, so keep this list in sync with it.
 - E2E tests (Playwright, `e2e/`) run their own API on 3201 and client on 5201 against a fresh `packages/server/e2e.db`, so they never touch `dev.db`. Shared steps live in the `KeeperApp` page object; every test signs up its own `@example.invalid` account. Product URLs use `https://shop.example.invalid/...` because the server's SSRF check (`isSafeUrl`) rejects localhost pages. Tests that fetch real sites are tagged `@network` (skip with `--grep-invert @network`). A test for a known, unfixed bug is marked `test.fail(true, '<reason>')`; remove the marker in the fix.
 
 ## Server conventions
