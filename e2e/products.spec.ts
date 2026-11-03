@@ -95,6 +95,27 @@ test.describe('products and categories', () => {
         await expect(app.card('Film item')).toBeVisible();
     });
 
+    test('a filter change during a slow load shows the newest filter', async ({ page }) => {
+        await app.addProduct('Book item', 'book-item', { category: 'books' });
+        await app.addProduct('Film item', 'film-item', { category: 'films' });
+        await page.route('**/api/products?categoryIds=*', async route => {
+            const response = await route.fetch();
+            await page.waitForTimeout(1000);
+            await route.fulfill({ response });
+        }, { times: 1 });
+        const staleResponse = page.waitForResponse('**/api/products?categoryIds=*');
+
+        const booksChip = page.getByRole('button', { name: /^books/ });
+        await booksChip.click();
+        await booksChip.click();
+        await (await staleResponse).finished();
+        await page.evaluate(() => new Promise(resolve => setTimeout(resolve, 200)));
+
+        await expect(booksChip).toHaveAttribute('aria-pressed', 'false');
+        await expect(app.card('Film item')).toBeVisible();
+        await expect(app.card('Book item')).toBeVisible();
+    });
+
     test('category names are trimmed, inner spaces collapsed, and duplicates are found ignoring case, including system ones', async ({ page }) => {
         await page.getByRole('button', { name: 'add product' }).click();
         const dialog = page.getByRole('dialog', { name: 'New product' });
