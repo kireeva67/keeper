@@ -17,7 +17,9 @@ export default function NewProductDialog({ fullPage = false }: { fullPage?: bool
   const isModal = Boolean(state?.background) && !fullPage;
   const { addProductToState } = useProducts();
   const [addingCategory, setAddingCategory] = useState(false);
-  const title = addingCategory ? "New category" : "New product";
+  const productTitle = "New product";
+  const title = addingCategory ? "New category" : productTitle;
+  const actionsInTopBar = isModal && isMobile;
 
   const handleClose = () => {
     const state = location.state as { background?: Location } | undefined;
@@ -41,17 +43,14 @@ export default function NewProductDialog({ fullPage = false }: { fullPage?: bool
       onCancel={handleClose}
       onSuccess={handleSuccess}
       onAddingCategoryChange={setAddingCategory}
+      topBarTitle={actionsInTopBar ? productTitle : undefined}
     />
   );
 
   return isModal ? (
     <Dialog open onClose={handleClose} fullWidth maxWidth="sm" fullScreen={isMobile}>
-      <DialogTitle sx={{ display: 'flex', justifyContent: 'center' }}>{title}</DialogTitle>
-      <DialogContent sx={isMobile ? {
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-      } : undefined}>{content}</DialogContent>
+      {!actionsInTopBar && <DialogTitle sx={{ display: 'flex', justifyContent: 'center' }}>{title}</DialogTitle>}
+      <DialogContent sx={actionsInTopBar ? { pt: 0 } : undefined}>{content}</DialogContent>
     </Dialog>
   ) : (
     <div style={{ maxWidth: 640, margin: "64px auto", padding: 16 }}>

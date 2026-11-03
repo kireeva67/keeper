@@ -18,6 +18,8 @@ export default function EditProductDialog() {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
+    const productTitle = "Edit Product";
+    const actionsInTopBar = isMobile && !loading;
     const handleClose = () => navigate(-1);
 
     const handleSuccess = (updatedProduct?: Product) => {
@@ -45,12 +47,8 @@ export default function EditProductDialog() {
 
     return (
         <Dialog open onClose={handleClose} fullWidth maxWidth="sm" fullScreen={isMobile}>
-            <DialogTitle sx={{ display: 'flex', justifyContent: 'center' }}>{addingCategory ? "New category" : "Edit Product"}</DialogTitle>
-            <DialogContent sx={isMobile ? {
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center',
-            } : undefined}>
+            {!actionsInTopBar && <DialogTitle sx={{ display: 'flex', justifyContent: 'center' }}>{addingCategory ? "New category" : productTitle}</DialogTitle>}
+            <DialogContent sx={actionsInTopBar ? { pt: 0 } : undefined}>
                 {loading ? (
                     <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
                         <CircularProgress />
@@ -61,6 +59,7 @@ export default function EditProductDialog() {
                         onCancel={handleClose}
                         onSuccess={handleSuccess}
                         onAddingCategoryChange={setAddingCategory}
+                        topBarTitle={actionsInTopBar ? productTitle : undefined}
                     />
                 )}
             </DialogContent>
