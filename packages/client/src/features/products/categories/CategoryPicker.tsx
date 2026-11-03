@@ -1,5 +1,5 @@
 import type { Ref } from "react";
-import { Box, ToggleButton, ToggleButtonGroup } from "@mui/material";
+import { Box, ToggleButton } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import type { Category } from "../../../shared/types/CategoryType";
 import { categoryChipSx } from "./categoryChipSx";
@@ -15,16 +15,13 @@ type Props = {
 export default function CategoryPicker({ categories, value, onChange, onAdd, addButtonRef }: Props) {
     return (
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 2, alignItems: 'center' }}>
-            <ToggleButtonGroup
-                value={value}
-                exclusive
-                onChange={(_, newId) => { if (newId) onChange(newId) }}
-                sx={{ flexWrap: 'wrap', gap: 1 }}
-            >
+            <Box role="group" aria-label="Category" sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                 {categories.map(cat => (
                     <ToggleButton key={cat.id} value={cat.id} size="small"
+                        selected={cat.id === value}
+                        onChange={() => onChange(cat.id)}
                         sx={{
-                            borderRadius: '16px !important',
+                            borderRadius: '16px',
                             textTransform: 'none',
                             height: 32,
                             px: 1.5,
@@ -32,17 +29,16 @@ export default function CategoryPicker({ categories, value, onChange, onAdd, add
                             minWidth: 'unset',
                             bgcolor: 'action.hover',
                             color: 'text.secondary',
-                            border: '1px solid transparent !important',
+                            border: '1px solid transparent',
                             '&:hover, &.Mui-selected, &.Mui-selected:hover': {
                                 ...categoryChipSx(cat.color),
-                                border: `1px solid ${cat.color} !important`,
                             },
                         }}
                     >
                         {cat.name.toLowerCase()}
                     </ToggleButton>
                 ))}
-            </ToggleButtonGroup>
+            </Box>
             {onAdd && (
                 <Box
                     component="button"
